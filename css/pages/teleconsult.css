@@ -1,0 +1,168 @@
+/* Teleconsultation Page Styles */
+.teleconsultation-container {
+    max-width: 1000px;
+    margin: 20px auto;
+    padding: 20px;
+    background-color: white;
+    border-radius: 10px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.teleconsultation-header {
+    text-align: center;
+    margin-bottom: 30px;
+    padding-bottom: 20px;
+    border-bottom: 2px solid #e2e8f0;
+}
+
+.teleconsultation-header h1 {
+    color: #5a67d8;
+    margin-bottom: 10px;
+}
+
+.teleconsultation-content {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 30px;
+}
+
+/* Calendar Section */
+.calendar-section {
+    background-color: #f9fafc;
+    border-radius: 8px;
+    padding: 20px;
+    border: 1px solid #e2e8f0;
+}
+
+.calendar-section h2 {
+    color: #5a67d8;
+    margin-bottom: 15px;
+    border-bottom: 2px solid #e2e8f0;
+    padding-bottom: 10px;
+}
+
+#appointment-calendar {
+    max-width: 100%;
+}
+
+/* Consultation Details */
+.consultation-details {
+    background-color: #f9fafc;
+    border-radius: 8px;
+    padding: 20px;
+    border: 1px solid #e2e8f0;
+    display: flex;
+    flex-direction: column;
+}
+
+.doctor-info {
+    display: flex;
+    align-items: center;
+    margin-bottom: 20px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.doctor-avatar {
+    background-color: #e6e6fa;
+    border-radius: 50%;
+    width: 100px;
+    height: 100px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 20px;
+}
+
+.doctor-details h3 {
+    color: #5a67d8;
+    margin-bottom: 5px;
+}
+
+.consultation-actions {
+    margin-top: auto;
+}
+
+.join-video-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    padding: 12px;
+    background-color: #5a67d8;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-weight: bold;
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
+.join-video-btn:hover {
+    background-color: #434190;
+}
+
+.consultation-status {
+    background-color: #f0f0f0;
+    padding: 15px;
+    border-radius: 8px;
+    text-align: center;
+}
+
+/* Medical Notes Section */
+.medical-notes {
+    margin-top: 30px;
+    background-color: #f9fafc;
+    border-radius: 8px;
+    padding: 20px;
+    border: 1px solid #e2e8f0;
+}
+
+.medical-notes h2 {
+    color: #5a67d8;
+    margin-bottom: 15px;
+    border-bottom: 2px solid #e2e8f0;
+    padding-bottom: 10px;
+}
+
+.note-item {
+    background-color: white;
+    border-radius: 8px;
+    padding: 15px;
+    margin-bottom: 15px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+}
+
+.note-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.note-header h3 {
+    color: #5a67d8;
+    margin: 0;
+}
+
+.note-date {
+    color: #666;
+    font-size: 0.8em;
+}
+
+/* Responsive Adjustments */
+@media screen and (max-width: 768px) {
+    .teleconsultation-content {
+        grid-template-columns: 1fr;
+    }
+
+    .doctor-info {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .doctor-avatar {
+        margin-right: 0;
+        margin-bottom: 15px;
+    }
+}

@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Bob AI - Exercise</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="styles.css">
+    <script type="module" src="https://cdn.jsdelivr.net/npm/@tensorflow-models/pose-detection"></script>
+    <script type="module" src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-backend-webgl"></script>
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <nav>
+            <div class="logo">Bob.AI</div>
+            <ul>
+                <li><a href="dashboard.html">Home</a></li>
+                <li><a href="exercise-library.html">Exercises</a></li>
+                <li><a href="profile.html">Profile</a></li>
+                <li><a href="teleconsultation.html">Teleconsultation</a></li>
+                <li><a href="#" onclick="logout()">Logout</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <!-- Main Section -->
+    <main>
+        <section class="exercise-session">
+            <h1 id="exerciseTitle">Exercise: </h1>
+            <div id="videoContainer">
+                <video id="video" autoplay playsinline></video>
+                <canvas id="output"></canvas>
+            </div>
+            <div style="text-align: center; margin-top: 20px;">
+                <button onclick="goBack()">Back to Dashboard</button>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer>
+        <p>&copy; 2024 Bob.AI | <a href="#">Help</a> | <a href="#">Contact Us</a> | <a href="#">Privacy Policy</a></p>
+    </footer>
+
+    <script type="module">
+        import * as poseDetection from '@tensorflow-models/pose-detection';
+        import '@tensorflow/tfjs-backend-webgl';
+
+        let video;
+        let canvas;
+        let ctx;
+        let detector;
+
+        let poses = [];
+
+        async function setup() {
+            // Get the video element
+            video = document.getElementById('video');
+            canvas = document.getElementById('output');
+            ctx = canvas.getContext('2d');
+
+            // Set video properties
+            const stream = await navigator.mediaDevices.getUserMedia({
+                video: true
+            });
+            video.srcObject = stream;
+
+            // Initialize the pose detector
+            detector = await poseDetection.createDetector(poseDetection.SupportedModels.PoseNet);
+
+            // Set canvas size
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+
+            // Start detecting poses
+            detectPose();
+        }
+
+        async function detectPose() {
+            // Continuously detect poses
+            const poses = await detector.estimatePoses(video);
+            drawPose(poses);
+
+            // Call detectPose again for the next frame
+            requestAnimationFrame(detectPose);
+        }
+
+        function drawPose(poses) {
+            // Clear previous canvas frame
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Draw the video feed on the canvas
+            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+            // Draw keypoints and skeleton
+            poses.forEach(pose => {
+                drawSkeleton(pose.keypoints);
+                drawKeypoints(pose.keypoints);
+            });
+        }
+
+        function drawKeypoints(keypoints) {
+            keypoints.forEach(keypoint => {
+                if (keypoint.score > 0.1) {
+                    ctx.beginPath();
+                    ctx.arc(keypoint.x, keypoint.y, 5, 0, 2 * Math.PI);
+                    ctx.fillStyle = 'green';
+                    ctx.fill();
+                }
+            });
+        }
+
+        function drawSkeleton(keypoints) {
+            const adjacentKeyPoints = poseDetection.util.getAdjacentKeyPoints(keypoints, 0.1);
+            adjacentKeyPoints.forEach(([a, b]) => {
+                ctx.beginPath();
+                ctx.moveTo(a.x, a.y);
+                ctx.lineTo(b.x, b.y);
+                ctx.strokeStyle = 'red';
+                ctx.lineWidth = 2;
+                ctx.stroke();
+            });
+        }
+
+        function goBack() {
+            window.location.href = "dashboard.html";
+        }
+
+        function logout() {
+            sessionStorage.removeItem("isLoggedIn");
+            sessionStorage.removeItem("user");
+            window.location.href = "login.html";
+        }
+
+        document.addEventListener("DOMContentLoaded", () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const exercise = urlParams.get("exercise") || "Unknown Exercise";
+            document.getElementById("exerciseTitle").textContent = `Exercise: ${exercise}`;
+            setup();
+        });
+    </script>
+</body>
+</html>

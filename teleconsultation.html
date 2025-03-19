@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bob.AI - Teleconsultation</title>
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+    <link rel="stylesheet" href="css/common/common.css">
+    <link rel="stylesheet" href="css/pages/teleconsultation.css">
+    <link rel="stylesheet" href="css/common/ai-assistant.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.0/main.min.css">
+</head>
+<body>
+    <header>
+        <nav>
+            <div class="logo">Bob.AI</div>
+            <ul class="nav-links">
+                <li><a href="dashboard.html">Dashboard</a></li>
+                <li><a href="exercise-library.html">Exercises</a></li>
+                <li><a href="profile.html">Profile</a></li>
+                <li><a href="teleconsultation.html" class="active">Teleconsultation</a></li>
+                <li><a href="#" onclick="logout()">Logout</a></li>
+            </ul>
+            <div class="menu-toggle" onclick="toggleMenu()">&#9776;</div>
+        </nav>
+    </header>
+
+    <main class="teleconsultation-container">
+        <section class="teleconsultation-header">
+            <h1>Teleconsultation</h1>
+            <p>Book a consultation with your doctor to review your rehab progress.</p>
+        </section>
+
+        <div class="teleconsultation-content">
+            <div class="calendar-section">
+                <h2>Schedule Appointment</h2>
+                <div id="appointment-calendar"></div>
+            </div>
+
+            <div class="consultation-details">
+                <div class="doctor-info">
+                    <div class="doctor-avatar">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="#5a67d8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-user-circle-2">
+                            <path d="M18 20a6 6 0 0 0-12 0"></path>
+                            <circle cx="12" cy="10" r="4"></circle>
+                            <circle cx="12" cy="12" r="10"></circle>
+                        </svg>
+                    </div>
+                    <div class="doctor-details">
+                        <h3>Dr. Bob Lee</h3>
+                        <p>Rehabilitation Specialist</p>
+                        <p>Expertise: Sports Medicine & Recovery</p>
+                    </div>
+                </div>
+
+                <div class="consultation-actions">
+                    <button onclick="joinVideoCall()" class="join-video-btn">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-video">
+                            <path d="m16 10 3-3a2.828 2.828 0 0 1 4 4l-3 3"></path>
+                            <path d="M7 10H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2h-3"></path>
+                            <rect width="10" height="10" x="7" y="10" rx="2"></rect>
+                        </svg>
+                        Join Video Call
+                    </button>
+                    <div class="consultation-status">
+                        <p><strong>Next Consultation:</strong> April 15, 2025</p>
+                        <p><strong>Status:</strong> Upcoming</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <section class="medical-notes">
+            <h2>Recent Medical Notes</h2>
+            <div class="notes-container">
+                <div class="note-item">
+                    <div class="note-header">
+                        <h3>Progress Review</h3>
+                        <span class="note-date">March 1, 2025</span>
+                    </div>
+                    <p>Patient showing significant improvement in upper body mobility. Recommended continued physical therapy.</p>
+                </div>
+                <div class="note-item">
+                    <div class="note-header">
+                        <h3>Treatment Plan Update</h3>
+                        <span class="note-date">February 15, 2025</span>
+                    </div>
+                    <p>Adjusted exercise intensity. Focus on gradual strength building and range of motion exercises.</p>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <p>&copy; 2024 Bob.AI | <a href="#">Help</a> | <a href="#">Contact Us</a> | <a href="#">Privacy Policy</a></p>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.0/main.min.js"></script>
+    <script src="js/teleconsultation.js"></script>
+    <script src="js/ai-assistant.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            var calendarEl = document.getElementById('appointment-calendar');
+            var calendar = new FullCalendar.Calendar(calendarEl, {
+                initialView: 'dayGridMonth',
+                headerToolbar: {
+                    left: 'prev,next today',
+                    center: 'title',
+                    right: 'dayGridMonth,timeGridWeek,timeGridDay'
+                },
+                selectable: true,
+                selectMirror: true,
+                select: function(arg) {
+                    // Handle date selection
+                    console.log('Selected date: ', arg.startStr);
+                }
+            });
+            calendar.render();
+        });
+    </script>
+</body>
+</html>

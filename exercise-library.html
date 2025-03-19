@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Exercise Library - Bob.AI</title>
+    <link rel="stylesheet" href="css/common/common.css">
+    <link rel="stylesheet" href="css/pages/exercise.css">
+    <link rel="stylesheet" href="css/common/ai-assistant.css">
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+
+    <!-- Firebase Configuration and Initialization -->
+    <script>
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyBffgdh_R6enZtaXoPkjI7aUw0iUeZLSK4",
+            authDomain: "bobai-8c377.firebaseapp.com",
+            projectId: "bobai-8c377",
+            storageBucket: "bobai-8c377.appspot.com",
+            messagingSenderId: "453258491853",
+            appId: "1:453258491853:web:09880e222756b8719e7684",
+            measurementId: "G-ZSZQYK2EC4"
+        };
+
+        // Initialize Firebase
+        try {
+            if (!firebase.apps.length) {
+                firebase.initializeApp(firebaseConfig);
+                console.log("Firebase initialized successfully!");
+            }
+            
+            // Create global Firestore reference
+            window.db = firebase.firestore();
+            console.log("Firestore reference created successfully");
+        } catch (error) {
+            console.error("Firebase initialization error:", error);
+        }
+    </script>
+</head>
+<body>
+    <!-- Header Section -->
+    <header>
+        <nav>
+            <div class="logo">Bob.AI</div>
+            <ul class="nav-links">
+                <li><a href="dashboard.html">Home</a></li>
+                <li><a href="exercise-library.html" class="active">Exercises</a></li>
+                <li><a href="profile.html">Profile</a></li>
+                <li><a href="teleconsultation.html">Teleconsultation</a></li>
+                <li><a href="#" onclick="logout()">Logout</a></li>
+            </ul>
+            <div class="menu-toggle" onclick="toggleMenu()">&#9776;</div>
+        </nav>
+    </header>
+
+    <!-- Main Section -->
+    <main>
+        <!-- Program of the Day -->
+        <section class="program-of-the-day">
+            <h1>Today's Program</h1>
+            <div id="todayProgram">
+                <p class="loading-message">Loading your workout plan...</p>
+            </div>
+        </section>
+
+        <!-- Exercise Library -->
+        <section class="exercise-library">
+            <h2>Exercise Library</h2>
+            <div class="exercise-grid">
+                <div class="exercise-card">
+                    <img src="images/bicep curl.jpg" alt="Bicep Curl">
+                    <h3>Bicep Curl</h3>
+                    <div class="exercise-settings">
+                        <div class="setting-group">
+                            <label for="bicep-sets">Sets:</label>
+                            <input type="number" id="bicep-sets" value="3" min="1" max="10" class="setting-input">
+                        </div>
+                        
+                        <div class="setting-group">
+                            <label for="bicep-reps">Reps:</label>
+                            <input type="number" id="bicep-reps" value="5" min="1" max="20" class="setting-input">
+                        </div>
+                    </div>
+                    <button onclick="startExercise('bicep-curl')" class="start-btn">Start Exercise</button>
+                </div>
+
+                <div class="exercise-card">
+                    <img src="images/arm raises.jpg" alt="Arm Raises">
+                    <h3>Arm Raises</h3>
+                    <div class="exercise-settings">
+                        <div class="setting-group">
+                            <label for="arm-raises-sets">Sets:</label>
+                            <input type="number" id="arm-raises-sets" value="3" min="1" max="10" class="setting-input">
+                        </div>
+                        
+                        <div class="setting-group">
+                            <label for="arm-raises-reps">Reps:</label>
+                            <input type="number" id="arm-raises-reps" value="5" min="1" max="20" class="setting-input">
+                        </div>
+                    </div>
+                    <button onclick="startExercise('arm-raises')" class="start-btn">Start Exercise</button>
+                </div>
+
+                <div class="exercise-card">
+                    <img src="images/sit and stand.jpg" alt="Sit and Stand">
+                    <h3>Sit and Stand</h3>
+                    <div class="exercise-settings">
+                        <div class="setting-group">
+                            <label for="sit-and-stand-sets">Sets:</label>
+                            <input type="number" id="sit-and-stand-sets" value="3" min="1" max="10" class="setting-input">
+                        </div>
+                        
+                        <div class="setting-group">
+                            <label for="sit-and-stand-reps">Reps:</label>
+                            <input type="number" id="sit-and-stand-reps" value="5" min="1" max="20" class="setting-input">
+                        </div>
+                    </div>
+                    <button onclick="startExercise('sit-and-stand')" class="start-btn">Start Exercise</button>
+                </div>
+
+                <div class="exercise-card">
+                    <img src="images/leg extension.jpg" alt="Leg Extension">
+                    <h3>Leg Extension</h3>
+                    <div class="exercise-settings">
+                        <div class="setting-group">
+                            <label for="leg-extension-sets">Sets:</label>
+                            <input type="number" id="leg-extension-sets" value="3" min="1" max="10" class="setting-input">
+                        </div>
+                        
+                        <div class="setting-group">
+                            <label for="leg-extension-reps">Reps:</label>
+                            <input type="number" id="leg-extension-reps" value="5" min="1" max="20" class="setting-input">
+                        </div>
+                    </div>
+                    <button onclick="startExercise('leg-extension')" class="start-btn">Start Exercise</button>
+                </div>
+
+                <div class="exercise-card">
+                    <img src="images/hand exercises.jpg" alt="Hand Exercise">
+                    <h3>Hand Exercise</h3>
+                    <div class="exercise-settings">
+                        <div class="setting-group">
+                            <label for="hand-exercise-sets">Sets:</label>
+                            <input type="number" id="hand-exercise-sets" value="3" min="1" max="10" class="setting-input">
+                        </div>
+                        
+                        <div class="setting-group">
+                            <label for="hand-exercise-reps">Reps:</label>
+                            <input type="number" id="hand-exercise-reps" value="5" min="1" max="20" class="setting-input">
+                        </div>
+                    </div>
+                    <button onclick="startExercise('hand-exercise')" class="start-btn">Start Exercise</button>
+                </div>
+            </div>
+        </section>
+        
+        <!-- Interactive Games -->
+        <section class="interactive-games">
+            <h2>Interactive Games</h2>
+            <div class="games-grid">
+                <div class="game-card">
+                    <img src="images/memorygame.png" alt="Memory Match">
+                    <h3>Memory Match</h3>
+                    <p>Exercise your memory and cognitive skills with this matching game.</p>
+                    <button class="play-button" onclick="playGame('memory-match')">Play Now</button>
+                </div>
+                <div class="game-card">
+                    <img src="images/simonsays.png" alt="Reaction Time">
+                    <h3>Reaction Time</h3>
+                    <p>Improve your reaction speed and hand-eye coordination.</p>
+                    <button class="play-button" onclick="playGame('reaction-time')">Play Now</button>
+                </div>
+                <div class="game-card">
+                    <img src="images/star-catcher.png" alt="Star Catcher">
+                    <h3>Star Catcher</h3>
+                    <p>Improve your reaction speed and hand-eye coordination.</p>
+                    <button class="play-button" onclick="playGame('starcatchergame')">Play Now</button>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer>
+        <p>&copy; 2024 Bob.AI | <a href="#">Help</a> | <a href="#">Contact Us</a> | <a href="#">Privacy Policy</a></p>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="js/exercise.js"></script>
+    <script src="js/ai-assistant.js"></script>
+
+</body>
+</html>

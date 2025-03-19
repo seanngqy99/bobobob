@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Memory Match Game</title>
+    <link rel="stylesheet" href="../css/pages/memorymatch.css">
+</head>
+<body>
+    <div class="game-container">
+        <header>
+            <h1>Memory Match</h1>
+            <div class="game-info">
+                <div class="stats">
+                    <div class="matches">Matches: <span id="matches">0</span></div>
+                    <div class="attempts">Attempts: <span id="attempts">0</span></div>
+                </div>
+                <div class="level-info">Level: <span id="current-level">1</span></div>
+                <button id="reset-btn">New Game</button>
+            </div>
+            <div class="level-selection">
+                <button class="level-btn active" data-level="1">Level 1</button>
+                <button class="level-btn" data-level="2">Level 2</button>
+                <button class="level-btn" data-level="3">Level 3</button>
+            </div>
+        </header>
+        
+        <div class="game-board grid-3-4" id="game-board">
+            <!-- Cards will be inserted by JavaScript -->
+        </div>
+        
+        <div class="message-overlay" id="message-overlay">
+            <div class="message-box">
+                <h2 id="message-title">Congratulations!</h2>
+                <p id="message-text">You've completed the game!</p>
+                <div class="message-stats">
+                    <p>Matches: <span id="final-matches">0</span></p>
+                    <p>Attempts: <span id="final-attempts">0</span></p>
+                </div>
+                <button id="play-again-btn">Play Again</button>
+            </div>
+        </div>
+    </div>
+    
+    <script src="../js/memorygame.js"></script>
+</body>
+</html>

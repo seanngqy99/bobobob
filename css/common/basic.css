@@ -1,0 +1,44 @@
+/**
+ * Bob.AI - Basic Styles
+ * Minimal base styles needed for all pages
+ */
+
+/* Reset and base styles */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+  
+  body {
+    font-family: 'Roboto', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    line-height: 1.5;
+    color: #333;
+    background-color: #f5f7fa;
+    min-height: 100vh;
+  }
+  
+  h1, h2, h3, h4, h5, h6 {
+    color: #2c3e50;
+  }
+  
+  /* Basic paragraph */
+  p {
+    margin-bottom: 1em;
+  }
+  
+  /* Basic link styles */
+  a {
+    color: #3498db;
+    text-decoration: none;
+  }
+  
+  a:hover {
+    color: #2980b9;
+  }
+  
+  /* Basic button reset */
+  button {
+    cursor: pointer;
+    font-family: inherit;
+  }

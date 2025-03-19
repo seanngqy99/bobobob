@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Sit-to-Stand Exercise</title>
+  
+  <!-- Mediapipe scripts for BlazePose -->
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/control_utils/control_utils.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/pose/pose.js"></script>
+  
+  <!-- Import your workout.css file -->
+  <link rel="stylesheet" href="../css/pages/workout.css">
+  
+  <style>
+    /* Additional specific styles for sit-to-stand exercise */
+    .exercise-container {
+      display: flex;
+      flex-direction: row;
+      width: 100%;
+      height: 100vh;
+      box-sizing: border-box;
+    }
+    
+    /* Rep counters styling specific to sit-to-stand */
+    #repCountText {
+      font-weight: 500;
+      padding: 8px 0;
+      margin-top: 15px;
+      text-align: center;
+      background-color: white;
+      border-radius: var(--border-radius);
+      padding: 10px;
+    }
+    
+    /* Progress container for sit-to-stand */
+    .progress-container {
+      width: 100%;
+      max-width: 1100px;
+      margin: 20px auto 0;
+      background-color: white;
+      border-radius: var(--border-radius);
+      padding: 20px;
+      box-shadow: var(--shadow);
+    }
+    
+    /* Hide number inputs as per your CSS */
+    #controls label:has(input[type="number"]) {
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="exercise-container">
+    <!-- Left side: UI Controls -->
+    <div id="controls">
+      <h2>Sit-to-Stand Exercise</h2>
+      <p>This exercise helps build lower body strength. Start seated, then stand up completely and sit back down to count one rep.</p>
+      
+      <!-- Hidden inputs for reps and sets (will be set via sessionStorage) -->
+      <label>
+        <input type="number" id="repInput" value="5" min="1" max="20">
+      </label>
+      
+      <label>
+        <input type="number" id="setInput" value="3" min="1" max="5">
+      </label>
+      
+      <!-- Start button -->
+      <button id="startBtn">Start Exercise</button>
+      
+      <!-- Status text -->
+      <div id="statusText">Camera initializing...</div>
+      <div id="repCountText"></div>
+      
+      <!-- Rep progress section -->
+      <div class="rep-progress-container">
+        <h3>Exercise Progress</h3>
+        <div id="repProgress" class="rep-progress">
+          <!-- Rep indicators will be added dynamically here -->
+        </div>
+      </div>
+    </div>
+    
+    <!-- Right side: Video & Canvas Container -->
+    <div class="container">
+      <video class="input_video" playsinline></video>
+      <canvas class="output_canvas"></canvas>
+    </div>
+  </div>
+  
+  <!-- JavaScript -->
+  <script src="../js/sitandstand.js"></script>
+</body>
+</html>

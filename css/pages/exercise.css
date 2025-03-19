@@ -1,0 +1,229 @@
+/* Program of the Day Enhancement */
+.program-of-the-day {
+    background: linear-gradient(135deg, #ffcc00, #ffb700);
+    padding: 25px;
+    margin: 20px auto;
+    border-radius: 10px;
+    max-width: 700px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+.program-of-the-day h1 {
+    color: #333;
+    margin-top: 0;
+    margin-bottom: 15px;
+    font-size: 22px;
+    text-align: center;
+}
+
+.program-of-the-day h3 {
+    color: #444;
+    font-size: 20px;
+    margin-top: 0;
+    margin-bottom: 15px;
+    text-align: center;
+}
+
+.exercise-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.exercise-list li {
+    background-color: rgba(255, 255, 255, 0.6);
+    margin-bottom: 8px;
+    padding: 12px 15px;
+    border-radius: 6px;
+    font-size: 16px;
+    transition: transform 0.2s;
+}
+
+.exercise-list li:hover {
+    transform: translateX(5px);
+    background-color: rgba(255, 255, 255, 0.8);
+}
+
+.exercise-list li strong {
+    color: #5a67d8;
+}
+
+.loading-message {
+    text-align: center;
+    color: #666;
+    font-style: italic;
+}
+
+/* Exercise Library (Enhanced from existing styles) */
+.exercise-library {
+    max-width: 900px;
+    margin: auto;
+    padding: 20px;
+    text-align: center;
+}
+
+.exercise-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+    padding: 20px;
+    justify-content: center;
+}
+
+.exercise-card {
+    background: white;
+    padding: 15px;
+    border-radius: 10px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    text-align: center;
+    transition: transform 0.3s ease-in-out;
+    display: flex;
+    flex-direction: column;
+}
+
+.exercise-card:hover {
+    transform: scale(1.02);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+}
+
+.exercise-card img {
+    width: 100%;
+    height: 180px;
+    object-fit: contain;
+    border-radius: 10px;
+    margin-bottom: 10px;
+}
+
+.exercise-card h3 {
+    margin-top: 5px;
+    margin-bottom: 10px;
+    font-size: 18px;
+    color: #333;
+}
+
+/* Exercise Settings */
+.exercise-settings {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px;
+    margin: 10px 0;
+}
+
+.setting-group {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.setting-input {
+    width: 50px;
+    padding: 5px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    text-align: center;
+}
+
+.start-btn {
+    padding: 8px 15px;
+    margin-top: 10px;
+    font-size: 16px;
+    border: none;
+    background: linear-gradient(135deg, #5a67d8, #434190);
+    color: white;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+    font-weight: 600;
+}
+
+.start-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0px 6px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* Interactive Games (Enhanced from existing styles) */
+.interactive-games {
+    text-align: center;
+    margin: 20px auto;
+    max-width: 900px;
+}
+
+.games-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+    padding: 20px;
+    justify-content: center;
+}
+
+.game-card {
+    background: white;
+    padding: 15px;
+    border-radius: 10px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    text-align: center;
+    transition: transform 0.3s ease-in-out;
+    display: flex;
+    flex-direction: column;
+    height: 100%; /* Ensure equal height */
+    max-width: 300px; /* Limit max width */
+    margin: 0 auto; /* Center cards */
+}
+
+.game-card:hover {
+    transform: scale(1.05);
+}
+
+.game-card img {
+    width: 100%;
+    max-width: 250px;
+    height: 200px; /* Fixed height */
+    object-fit: cover; /* Ensure image covers entire space */
+    border-radius: 10px;
+    margin-bottom: 10px;
+    align-self: center;
+}
+
+.game-card h3 {
+    margin-top: 10px;
+    font-size: 18px;
+    color: #333;
+}
+
+.game-card p {
+    flex-grow: 1;
+    margin: 10px 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.play-button {
+    padding: 10px 20px;
+    font-size: 16px;
+    border: none;
+    background: linear-gradient(135deg, #5a67d8, #434190);
+    color: white;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+    margin-top: auto;
+}
+
+.play-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0px 6px 12px rgba(0,0,0,0.15);
+}
+
+/* Responsive Design */
+@media screen and (max-width: 768px) {
+    .games-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media screen and (max-width: 480px) {
+    .games-grid {
+        grid-template-columns: 1fr;
+    }
+}

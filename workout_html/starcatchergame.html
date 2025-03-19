@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Star Catcher Rehabilitation Game</title>
+  
+  <!-- MediaPipe scripts for Pose Detection -->
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/control_utils/control_utils.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/pose/pose.js"></script>
+  
+  <style>
+    /* Game-specific styles */
+    .game-container {
+      display: flex;
+      flex-direction: row;
+      width: 100%;
+      min-height: 100vh;
+      box-sizing: border-box;
+      align-items: flex-start;
+      padding: 20px;
+      font-family: Arial, sans-serif;
+    }
+    
+    /* Controls panel on the left */
+    #controls {
+      width: 280px;
+      background-color: white;
+      border-radius: 10px;
+      padding: 20px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+      margin-right: 20px;
+      height: fit-content;
+    }
+    
+    /* Game area (video + game elements) */
+    .game-area {
+      position: relative;
+      flex-grow: 1;
+      max-width: 800px;
+      aspect-ratio: 4/3;
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    }
+    
+    /* Video element */
+    #videoElement {
+      display: block;
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transform: scaleX(-1); /* Mirror the video */
+    }
+    
+    /* Canvas for video and pose detection */
+    #outputCanvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      border-radius: 10px;
+      z-index: 5;
+    }
+    
+    /* Game canvas overlaid on top of video canvas */
+    #gameCanvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      border-radius: 10px;
+      z-index: 10;
+      pointer-events: none;
+    }
+    
+    /* Game metrics display */
+    .game-metrics {
+      background-color: #f9f9f9;
+      border-radius: 10px;
+      padding: 15px;
+      margin-top: 15px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+    
+    .metric {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 8px;
+      font-size: 16px;
+    }
+    
+    .metric-value {
+      font-weight: 600;
+      color: #5a67d8;
+    }
+    
+    /* Difficulty and mode selection */
+    .difficulty-selection, 
+    .game-mode-selection {
+      margin-bottom: 20px;
+      border-bottom: 1px solid #e9ecef;
+      padding-bottom: 15px;
+    }
+    
+    /* Start button */
+    #startButton {
+      width: 100%;
+      padding: 10px;
+      background-color: #5a67d8;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+    
+    #startButton:hover {
+      background-color: #4a50b8;
+    }
+    
+    /* Game over popup */
+    #gameOverOverlay {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background-color: rgba(255, 255, 255, 0.9);
+      padding: 30px;
+      border-radius: 10px;
+      text-align: center;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+      z-index: 20;
+      display: none;
+    }
+    
+    /* Countdown display */
+    #countdownOverlay {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 100px;
+      color: white;
+      text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+      z-index: 15;
+      display: none;
+    }
+
+    /* Responsive design */
+    @media screen and (max-width: 768px) {
+      .game-container {
+        flex-direction: column;
+        align-items: center;
+      }
+      
+      #controls {
+        width: 100%;
+        max-width: 500px;
+        margin-right: 0;
+        margin-bottom: 20px;
+      }
+      
+      .game-area {
+        width: 100%;
+        max-width: 500px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="game-container">
+    <!-- Left side: UI Controls -->
+    <div id="controls">
+      <h2>Star Collector Game</h2>
+      <p>Reach out and collect stars with your hands! Improve your range of motion in a fun way.</p>
+      
+      <!-- Difficulty selection -->
+      <div class="difficulty-selection">
+        <p>Select difficulty:</p>
+        <label>
+          <input type="radio" name="difficulty" value="easy" checked> Easy
+        </label>
+        <label>
+          <input type="radio" name="difficulty" value="medium"> Medium
+        </label>
+        <label>
+          <input type="radio" name="difficulty" value="hard"> Hard
+        </label>
+      </div>
+      
+      <!-- Game mode selection -->
+      <div class="game-mode-selection">
+        <p>Select game mode:</p>
+        <label>
+          <input type="radio" name="mode" value="timed" checked> Timed Mode (60s)
+        </label>
+        <label>
+          <input type="radio" name="mode" value="target"> Target Mode (30 stars)
+        </label>
+      </div>
+      
+      <!-- Start button -->
+      <button id="startButton">Start Game</button>
+      
+      <!-- Status text -->
+      <div id="statusText">Camera initializing...</div>
+      
+      <!-- Game metrics -->
+      <div class="game-metrics">
+        <div class="metric">
+          <span>Stars Collected:</span>
+          <span id="starsCollected" class="metric-value">0</span>
+        </div>
+        <div class="metric">
+          <span>Time Remaining:</span>
+          <span id="timeRemaining" class="metric-value">60s</span>
+        </div>
+        <div class="metric">
+          <span>Score:</span>
+          <span id="scoreDisplay" class="metric-value">0</span>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Right side: Game Area -->
+    <div class="game-area">
+      <video id="videoElement" playsinline></video>
+      <canvas id="outputCanvas"></canvas>
+      <canvas id="gameCanvas"></canvas>
+      <div id="countdownOverlay">3</div>
+      <div id="gameOverOverlay">
+        <h2>Game Over!</h2>
+        <p>Your score: <span id="finalScore">0</span></p>
+        <p>Stars collected: <span id="finalStars">0</span></p>
+        <button id="playAgainButton">Play Again</button>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Game Script -->
+  <script src="../js/starcatchergame.js"></script>
+</body>
+</html>

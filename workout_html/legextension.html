@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Leg Extension Exercise</title>
+
+  <!-- Mediapipe scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/control_utils/control_utils.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/pose/pose.js"></script>
+
+  <!-- Custom styles -->
+  <link rel="stylesheet" href="../css/pages/workout.css">
+</head>
+<body>
+  <!-- Left side: user controls -->
+  <div id="controls">
+    <h2>Leg Extension Exercise</h2>
+
+    <!-- Leg selection -->
+    <label><input type="radio" name="legSelect" value="left" checked> Left Leg</label>
+    <label><input type="radio" name="legSelect" value="right"> Right Leg</label>
+    <label><input type="radio" name="legSelect" value="both"> Both Legs</label>
+
+    <!-- Number of reps -->
+    <label>Number of Reps: 
+      <input type="number" id="repInput" value="5" min="1" max="10">
+    </label>
+
+    <!-- Start button -->
+    <button id="startBtn">Start Exercise</button>
+
+    <!-- Status / counters -->
+    <p id="leftCountText"></p>
+    <p id="rightCountText"></p>
+    <p id="statusText">Waiting to start...</p>
+    
+    <!-- Rep progress visualization -->
+    <div class="rep-progress-container">
+      <h3>Left Leg Progress</h3>
+      <div id="leftRepProgress" class="rep-progress">
+        <!-- Rep progress bars will be dynamically added here -->
+      </div>
+      
+      <h3>Right Leg Progress</h3>
+      <div id="rightRepProgress" class="rep-progress">
+        <!-- Rep progress bars will be dynamically added here -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Right side: container with hidden video and the canvas -->
+  <div class="container">
+    <video class="input_video" playsinline></video>
+    <canvas class="output_canvas"></canvas>
+  </div>
+
+  <!-- Custom JavaScript -->
+  <script src="../js/legextension.js"></script>
+</body>
+</html>

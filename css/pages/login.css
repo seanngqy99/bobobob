@@ -1,0 +1,165 @@
+/**
+ * Bob.AI - Login Page Styles
+ */
+
+/* Login page container */
+.login-container {
+    display: flex;
+    min-height: 100vh;
+    align-items: center;
+    justify-content: center;
+    background-color: #f5f7fa;
+    padding: 20px;
+  }
+  
+  /* Login card with split layout */
+  .login-card {
+    display: flex;
+    flex-direction: row;
+    max-width: 900px;
+    width: 100%;
+    background-color: white;
+    border-radius: 10px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+  }
+  
+  /* Left side image */
+  .login-image {
+    flex: 1;
+    background-image: url('../../images/login-image.png');
+    background-size: cover;
+    background-position: center;
+    min-height: 500px;
+  }
+  
+  /* Fallback for image */
+  .login-image-fallback {
+    flex: 1;
+    background-color: #2c3e50;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    padding: 20px;
+    text-align: center;
+  }
+  
+  /* Right side form section */
+  .login-form-section {
+    flex: 1;
+    padding: 40px;
+  }
+  
+  /* Logo and tagline area */
+  .logo-area {
+    text-align: center;
+    margin-bottom: 30px;
+  }
+  
+  .logo {
+    font-size: 28px;
+    font-weight: bold;
+    color: #2c3e50;
+  }
+  
+  .tagline {
+    font-size: 14px;
+    color: #7f8c8d;
+    margin-top: 5px;
+  }
+  
+  /* Form group elements */
+  .form-group {
+    margin-bottom: 20px;
+  }
+  
+  .form-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 500;
+    color: #2c3e50;
+  }
+  
+  .form-group input {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+    transition: border-color 0.3s;
+  }
+  
+  .form-group input:focus {
+    border-color: #3498db;
+    outline: none;
+  }
+  
+  /* Password container and toggle */
+  .password-container {
+    position: relative;
+  }
+  
+  #togglePassword {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    cursor: pointer;
+    user-select: none;
+  }
+  
+  /* Submit button */
+  button[type="submit"] {
+    width: 100%;
+    padding: 12px;
+    background-color: #3498db;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    font-size: 16px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.3s;
+  }
+  
+  button[type="submit"]:hover {
+    background-color: #2980b9;
+  }
+  
+  /* Message display */
+  #message {
+    margin-top: 15px;
+    font-size: 14px;
+    text-align: center;
+    min-height: 20px;
+  }
+  
+  /* Form footer with links */
+  .form-footer {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 20px;
+    font-size: 14px;
+  }
+  
+  .form-footer a {
+    color: #3498db;
+    text-decoration: none;
+  }
+  
+  .form-footer a:hover {
+    text-decoration: underline;
+  }
+  
+  /* Responsive adjustments */
+  @media (max-width: 768px) {
+    .login-card {
+      flex-direction: column;
+    }
+    
+    .login-image,
+    .login-image-fallback {
+      min-height: 200px;
+    }
+  }

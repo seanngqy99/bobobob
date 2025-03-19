@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bob.AI - Login</title>
+
+  <!-- CSS Files  -->
+  <link rel="stylesheet" href="css/common/basic.css">
+  <link rel="stylesheet" href="css/pages/login.css">
+  
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+</head>
+<body>
+  <div class="login-container">
+    <div class="login-card">
+      <!-- Left side image - you'll need to add this image to your project -->
+      <div class="login-image"></div>
+      
+      <!-- Fallback if image doesn't load -->
+      <noscript>
+        <div class="login-image-fallback">
+          <div>
+            <h2>Bob.AI</h2>
+            <p>Your Personalized Rehabilitation Assistant</p>
+            <p>We help you recover faster and stay on track with your rehabilitation journey.</p>
+          </div>
+        </div>
+      </noscript>
+      
+      <!-- Right side login form -->
+      <div class="login-form-section">
+        <div class="logo-area">
+          <div class="logo">Bob.AI 👨🏻‍⚕️</div>
+          <p class="tagline">Your Personalized Rehabilitation Assistant</p>
+        </div>
+        
+        <form id="loginForm">
+          <div class="form-group">
+            <label for="username">Username</label>
+            <input type="text" id="username" placeholder="Enter your username" required>
+          </div>
+          
+          <div class="form-group">
+            <label for="password">Password</label>
+            <div class="password-container">
+              <input type="password" id="password" placeholder="Enter your password" required>
+              <span id="togglePassword">👁️</span>
+            </div>
+          </div>
+          
+          <button type="submit">Login</button>
+          <p id="message"></p>
+          
+          <div class="form-footer">
+            <a href="#">Forgot Password?</a>
+            <a href="#">Need Help?</a>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Load login.js only -->
+  <script src="js/login.js"></script>
+</body>
+</html>
