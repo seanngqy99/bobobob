@@ -2,95 +2,64 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Sit-to-Stand Exercise</title>
+  <link rel="stylesheet" href="../css/common/common.css">
+  <link rel="stylesheet" href="../css/pages/workout.css">
   
   <!-- Mediapipe scripts for BlazePose -->
   <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@mediapipe/control_utils/control_utils.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@mediapipe/pose/pose.js"></script>
-  
-  <!-- Import your workout.css file -->
-  <link rel="stylesheet" href="../css/pages/workout.css">
-  
-  <style>
-    /* Additional specific styles for sit-to-stand exercise */
-    .exercise-container {
-      display: flex;
-      flex-direction: row;
-      width: 100%;
-      height: 100vh;
-      box-sizing: border-box;
-    }
-    
-    /* Rep counters styling specific to sit-to-stand */
-    #repCountText {
-      font-weight: 500;
-      padding: 8px 0;
-      margin-top: 15px;
-      text-align: center;
-      background-color: white;
-      border-radius: var(--border-radius);
-      padding: 10px;
-    }
-    
-    /* Progress container for sit-to-stand */
-    .progress-container {
-      width: 100%;
-      max-width: 1100px;
-      margin: 20px auto 0;
-      background-color: white;
-      border-radius: var(--border-radius);
-      padding: 20px;
-      box-shadow: var(--shadow);
-    }
-    
-    /* Hide number inputs as per your CSS */
-    #controls label:has(input[type="number"]) {
-      display: none;
-    }
-  </style>
 </head>
 <body>
-  <div class="exercise-container">
-    <!-- Left side: UI Controls -->
-    <div id="controls">
+  <header class="sticky-header">
+    <nav>
+        <div class="logo">RehabHero</div>
+        <ul class="nav-links">
+            <li><a href="../dashboard.html" class="active">Home</a></li>
+            <li><a href="../exercise-library.html">Exercises</a></li>
+            <li><a href="../profile.html">Profile</a></li>
+            <li><a href="../teleconsultation.html">Teleconsultation</a></li>
+            <li><a href="#" onclick="logout()">Logout</a></li>
+        </ul>
+        <div class="menu-toggle" onclick="toggleMenu()">&#9776;</div>
+    </nav>
+  </header>
+
+  <div class="three-column-layout">
+    <!-- Left column: user controls -->
+    <div id="controls" class="left-column">
       <h2>Sit-to-Stand Exercise</h2>
       <p>This exercise helps build lower body strength. Start seated, then stand up completely and sit back down to count one rep.</p>
-      
-      <!-- Hidden inputs for reps and sets (will be set via sessionStorage) -->
-      <label>
-        <input type="number" id="repInput" value="5" min="1" max="20">
-      </label>
-      
-      <label>
-        <input type="number" id="setInput" value="3" min="1" max="5">
-      </label>
       
       <!-- Start button -->
       <button id="startBtn">Start Exercise</button>
       
-      <!-- Status text -->
-      <div id="statusText">Camera initializing...</div>
-      <div id="repCountText"></div>
-      
-      <!-- Rep progress section -->
-      <div class="rep-progress-container">
-        <h3>Exercise Progress</h3>
-        <div id="repProgress" class="rep-progress">
-          <!-- Rep indicators will be added dynamically here -->
-        </div>
-      </div>
+      <!-- Status / counters -->
+      <p id="repCountText"></p>
+      <p id="statusText">Waiting to start...</p>
     </div>
-    
-    <!-- Right side: Video & Canvas Container -->
-    <div class="container">
+
+    <!-- Middle column: container with hidden video and the canvas -->
+    <div class="container middle-column">
       <video class="input_video" playsinline></video>
       <canvas class="output_canvas"></canvas>
     </div>
+    
+    <!-- Right column: Rep progress visualization -->
+    <div class="right-column">
+      <div class="rep-progress-container">
+        <h3>Exercise Progress</h3>
+        <div id="repProgress" class="rep-progress">
+          <!-- Rep progress bars will be dynamically added here -->
+        </div>
+      </div>
+    </div>
   </div>
-  
-  <!-- JavaScript -->
+
+  <!-- Custom JavaScript -->
   <script src="../js/sitandstand.js"></script>
 </body>
 </html>

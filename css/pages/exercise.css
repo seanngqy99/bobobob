@@ -139,7 +139,7 @@
 
 .start-btn:hover {
     transform: translateY(-2px);
-    box-shadow: 0px 6px 12px rgba(0, 0, 0, 0.15);
+    box-shadow: 0px 6px 12px rgba(0,0,0,0.15);
 }
 
 /* Interactive Games (Enhanced from existing styles) */
@@ -226,4 +226,33 @@
     .games-grid {
         grid-template-columns: 1fr;
     }
+}
+
+/* Ensure the container for the video and progress indicators is positioned correctly */
+.container {
+    position: relative; /* Allow absolute positioning of child elements */
+}
+
+/* New styles for side-by-side progress indicators */
+.rep-progress-container {
+    display: flex;
+    justify-content: space-between; /* Space between the two progress sections */
+    position: absolute; /* Position it at the bottom of the container */
+    bottom: 0; /* Align to the bottom */
+    left: 0; /* Align to the left */
+    right: 0; /* Align to the right */
+    margin-top: 20px; /* Add some space above the progress section */
+    padding: 10px; /* Add padding for better spacing */
+    background-color: rgba(255, 255, 255, 0.8); /* Optional: background for visibility */
+}
+
+.rep-progress-left, .rep-progress-right {
+    flex: 1; /* Allow both sections to take equal space */
+    margin: 0 10px; /* Add some margin between the two sections */
+}
+
+/* Optional: Style adjustments for progress bars */
+.rep-progress {
+    display: flex;
+    flex-direction: column; /* Stack progress bars vertically */
 }

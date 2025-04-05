@@ -50,6 +50,9 @@ function loadTodaysProgram() {
     "Hand Exercise",
     "Leg Extension", 
     "Sit and Stand",
+    "Finger Exercise",
+    "Front Raises",
+    "Head Tilts",
     "Games"
   ];
 
@@ -249,6 +252,15 @@ function startExercise(exerciseId) {
     case 'hand-exercise':
       window.location.href = 'workout_html/handexercise.html';
       break;
+    case 'finger-exercise':
+      window.location.href = 'workout_html/fingerexercise.html';
+      break;
+    case 'front-raises':
+      window.location.href = 'workout_html/frontraises.html';
+      break;
+    case 'head-tilts':
+      window.location.href = 'workout_html/headtilts.html';
+      break;
     default:
       console.log('No specific page for this exercise');
   }
@@ -268,10 +280,13 @@ function playGame(gameId) {
       window.location.href = 'workout_html/memorygame.html';
       break;
     case 'reaction-time':
-      alert(`The Reaction Time game will launch here. This feature is coming soon!`);
+      window.location.href = 'workout_html/simonsays.html';      
       break;
     case 'starcatchergame':
       window.location.href = 'workout_html/starcatchergame.html';
+      break;
+    case 'sign-language':
+      window.location.href = 'workout_html/signlanguage.html';
       break;
     default:
       alert(`Game "${gameId}" would launch here. This feature is coming soon!`);

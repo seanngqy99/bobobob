@@ -167,9 +167,9 @@ function drawProgressArc(ctx, x, y, angle) {
 
   // Use color gradient based on angle
   let color;
-  if (angle < 160) {
+  if (angle < 140) {
     color = '#f72585'; // Color for fully bent
-  } else if (angle > 170) {
+  } else if (angle > 150) {
     color = '#4cc9f0'; // Color for fully extended
   } else {
     color = '#4361ee'; // Color for in-between
@@ -319,9 +319,9 @@ function trackRep(angle, side) {
     
     // Rep logic for leg extension: 
     // If angle goes below 160 (bending) and then above 170 (extending)
-    if (!leftRepStarted && angle < 160) {
+    if (!leftRepStarted && angle < 150) {
       leftRepStarted = true;
-    } else if (leftRepStarted && angle > 170) {
+    } else if (leftRepStarted && angle > 150) {
       leftCount++;
       const rangeAchieved = currentLeftAngleMax - currentLeftAngleMin;
       markRepCompleted('left', leftCount, rangeAchieved);
@@ -341,9 +341,9 @@ function trackRep(angle, side) {
     updateCurrentRepProgress('right', currentRepNumber, currentRightAngleMin, currentRightAngleMax);
     
     // Rep logic for leg extension
-    if (!rightRepStarted && angle < 160) {
-      rightRepStarted = true;
-    } else if (rightRepStarted && angle > 170) {
+    if (!rightRepStarted && angle < 150) {
+      rightRepStarted = true; 
+    } else if (rightRepStarted && angle > 150) {
       rightCount++;
       const rangeAchieved = currentRightAngleMax - currentRightAngleMin;
       markRepCompleted('right', rightCount, rangeAchieved);
@@ -551,7 +551,7 @@ function onResults(results) {
         const textY = kY;
 
         // Decide color
-        const angleColor = (smoothedLeftAngle < 160 || smoothedLeftAngle > 170) ? 
+        const angleColor = (smoothedLeftAngle < 150 || smoothedLeftAngle > 150) ? 
                           'rgba(247, 37, 133, 0.9)' : 'rgba(76, 201, 240, 0.9)';
 
         canvasCtx.save();
@@ -592,7 +592,7 @@ function onResults(results) {
         const textX = canvasElement.width - kX;
         const textY = kY;
 
-        const angleColor = (smoothedRightAngle < 160 || smoothedRightAngle > 170) ? 
+        const angleColor = (smoothedRightAngle < 140 || smoothedRightAngle > 150) ? 
                           'rgba(247, 37, 133, 0.9)' : 'rgba(76, 201, 240, 0.9)';
         
         canvasCtx.save();

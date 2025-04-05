@@ -27,6 +27,7 @@ let restTimeRemaining = 0;
 let restInterval;
 const restBetweenSets = 30; // 30 seconds rest between sets
 
+let exerciseStartTime;
 let leftCount = 0;
 let rightCount = 0;
 let leftRepStarted = false;
@@ -53,8 +54,8 @@ let leftRepRanges = [];
 let rightRepRanges = [];
 
 // Modified angle thresholds for rep counting
-const STARTING_THRESHOLD = 160; // Lower threshold to consider arm "straight"
-const MOVEMENT_THRESHOLD = 100; // Angle below which we consider movement significant
+const STARTING_THRESHOLD = 120; // Lower threshold to consider arm "straight"
+const MOVEMENT_THRESHOLD = 107; // Angle below which we consider movement significant
 
 // DOM Elements
 const videoElement   = document.getElementsByClassName('input_video')[0];
@@ -103,22 +104,29 @@ canvasElement.height = 600;
 // Handle set completion
 function handleSetCompletion() {
   // Mark set as complete
-  currentSet++;
+  console.log(`Set ${currentSet} complete!`);
   
-  if (currentSet > targetSets) {
-    // All sets completed
-    statusText.textContent = "All sets completed! Great job!";
+  if (currentSet >= targetSets) {
+    // Exercise complete!
+    console.log("Exercise complete!");
     isAssessmentActive = false;
+    statusText.textContent = "All sets completed! Great job!";
+    
+    // Play completion sound
+    // playSound(880, 0.1, 500);
     return;
   }
   
-  // Start rest period
+  // Start rest period 
   isAssessmentActive = false;
   isResting = true;
   restTimeRemaining = restBetweenSets;
   
   // Start the rest timer
-  statusText.textContent = `Set ${currentSet-1} complete! Rest for ${restTimeRemaining} seconds`;
+  statusText.textContent = `Set ${currentSet} complete! Rest for ${restTimeRemaining} seconds`;
+  
+  // Play rest period sound
+  // playSound([440, 550], 0.1, 300);
   
   // Update the rest timer every second
   restInterval = setInterval(() => {
@@ -128,6 +136,9 @@ function handleSetCompletion() {
     if (restTimeRemaining <= 0) {
       clearInterval(restInterval);
       isResting = false;
+      
+      // Start next set
+      currentSet++;
       
       // Reset for next set
       leftCount = 0;
@@ -139,12 +150,15 @@ function handleSetCompletion() {
       currentRightAngleMin = 180;
       currentRightAngleMax = 0;
       
-      // Initialize progress bars for the new set
+      // Reset rep indicators for new set
       initRepProgressBars();
       
       // Start the next set
       isAssessmentActive = true;
       statusText.textContent = `Set ${currentSet} of ${targetSets}: Tracking ${armChoice} arm(s), ${targetReps} reps`;
+      
+      // Play sound to indicate new set
+      playSound(660, 0.1, 300);
     }
   }, 1000);
 }
@@ -294,19 +308,37 @@ function drawProgressArc(ctx, x, y, angle) {
   ctx.stroke();
 }
 
-function checkElbowDrift(ctx, shoulder, elbow) {
-  // If elbow.x < shoulder.x - 40 => draw 'X'
-  // Note that these coords are now in normal orientation after we revert
-  if (elbow.x < shoulder.x - 40) {
-    ctx.fillStyle = 'rgba(247, 37, 133, 0.9)'; // Warning color
-    ctx.font = 'bold 24px Poppins';
-    ctx.textAlign = 'center';
-    ctx.fillText('✕', elbow.x, elbow.y-30);
-    
-    // Add feedback text
-    ctx.font = 'bold 16px Poppins';
-    ctx.fillText('Keep elbow close', elbow.x, elbow.y-60);
+function analyzeRangeOfMotion(ctx, shoulder, elbow, wrist) {
+  // Calculate the angle between shoulder, elbow, and wrist
+  const angle = calculateAngle(shoulder, elbow, wrist);
+  
+  // Provide feedback based on angle
+  let feedback = '';
+  let color = 'green';
+
+  if (angle > 160 && angle < 180) {
+    feedback = 'Full Extension ✓';
+    color = 'rgba(76, 201, 240, 0.7)'; // Blue
+  } else if (angle >= 90 && angle <= 160) {
+    feedback = 'Good Curl Position';
+    color = 'rgba(255, 193, 7, 0.8)'; // Yellow
+  } else {
+    feedback = 'Adjust Your Form ⚠️';
+    color = 'rgba(247, 37, 133, 0.9)'; // Red
   }
+
+  // Visualize feedback
+  ctx.save();
+  ctx.fillStyle = color;
+  ctx.font = 'bold 16px Poppins';
+  ctx.textAlign = 'center';
+  ctx.fillText(feedback, elbow.x, elbow.y - 30);
+  ctx.restore();
+
+  return {
+    angle: angle,
+    feedback: feedback
+  };
 }
 
 // Update progress for the current rep in progress
@@ -422,6 +454,7 @@ function trackRep(angle, side) {
   }
 }
 
+
 function playSuccessSound() {
   // Create a simple beep sound
   try {
@@ -472,6 +505,7 @@ function updateUI() {
 
 // The 3s countdown logic
 function onStart() {
+  exerciseStartTime=new Date();
   // read which arm(s)
   for (let radio of armSelectElems) {
     if (radio.checked) {
@@ -593,12 +627,31 @@ function onResults(results) {
         // Draw the progress arc at mirrored location
         drawProgressArc(canvasCtx, textX, textY, smoothedLeftAngle);
 
+        // Draw guidance for rep state
+        let instructionText = "";
+        if (leftRepStarted === 0) {
+          instructionText = "Start with arm extended";
+        } else if (leftRepStarted === 1) {
+          instructionText = "Curl arm upward";
+        } else if (leftRepStarted === 2) {
+          instructionText = "Lower arm back down";
+        }
+
+        canvasCtx.fillStyle = 'rgb(238, 215, 67)';
+        canvasCtx.font = 'bold 16px Poppins';
+        canvasCtx.textAlign = 'center';
+        canvasCtx.fillText(instructionText, textX, textY - 75);
+
         // Check elbow drift in normal coords => we must also mirror the x of shoulder & elbow
         const sX = canvasElement.width - (lShoulder.x*canvasElement.width);
         const sY = lShoulder.y*canvasElement.height;
         const eDriftX = textX; 
         const eDriftY = textY;
-        checkElbowDrift(canvasCtx, {x:sX,y:sY},{x:eDriftX,y:eDriftY});
+        analyzeRangeOfMotion(canvasCtx, 
+          {x:sX, y:sY}, 
+          {x:eDriftX, y:eDriftY}, 
+          {x:textX, y:textY}
+        );
         canvasCtx.restore();
 
         // Rep counting
@@ -619,36 +672,200 @@ function onResults(results) {
         const rawRightAngle = calculateAngle(rShoulder, rElbow, rWrist);
         smoothedRightAngle = smoothAngle(smoothedRightAngle, rawRightAngle);
 
+        // Convert normalized -> pixel
         const eX = rElbow.x * canvasElement.width;
         const eY = rElbow.y * canvasElement.height;
 
-        // mirrored coords
+        // Mirror coordinates for text
         const textX = canvasElement.width - eX;
         const textY = eY;
 
+        // Decide color
         const angleColor = (smoothedRightAngle < 30 || smoothedRightAngle > 150) ? 
                           'rgba(247, 37, 133, 0.9)' : 'rgba(76, 201, 240, 0.9)';
-        
+
         canvasCtx.save();
         canvasCtx.fillStyle = angleColor;
         canvasCtx.font = 'bold 18px Poppins';
         canvasCtx.textAlign = 'center';
         canvasCtx.fillText(`${smoothedRightAngle.toFixed(0)}°`, textX, textY - 45);
-
+        
+        // Draw the progress arc
         drawProgressArc(canvasCtx, textX, textY, smoothedRightAngle);
+        // Updated drawTargetZone function for bicep curls
+        function drawTargetZone(ctx, shoulder, elbow, wrist, isLeftSide) {
+          // Extract coordinates with mirroring
+          const shoulderX = (1 - shoulder.x) * canvasElement.width; // Mirror X coordinate
+          const shoulderY = shoulder.y * canvasElement.height;
+          const elbowX = (1 - elbow.x) * canvasElement.width; // Mirror X coordinate  
+          const elbowY = elbow.y * canvasElement.height;
+          const wristX = (1 - wrist.x) * canvasElement.width; // Mirror X coordinate
+          const wristY = wrist.y * canvasElement.height;
+        
+          // Calculate the center point for the arc
+          const centerX = elbowX;
+          const centerY = elbowY;
+        
+          // Calculate the forearm vector
+          const forearmVector = {
+            x: wristX - elbowX,
+            y: wristY - elbowY
+          };
+        
+          // Calculate the forearm length
+          const forearmLength = Math.sqrt(forearmVector.x * forearmVector.x + forearmVector.y * forearmVector.y);
+        
+          // Calculate the normalized forearm vector
+          const forearmUnitVector = {
+            x: forearmVector.x / forearmLength,
+            y: forearmVector.y / forearmLength
+          };
+        
+          // Calculate the perpendicular vector
+          const perpendicularVector = {
+            x: forearmUnitVector.y,
+            y: -forearmUnitVector.x
+          };
+        
+          // Scale the perpendicular vector
+          const scaleFactor = 20;
+          const scaledPerpendicularVector = {
+            x: perpendicularVector.x * scaleFactor,
+            y: perpendicularVector.y * scaleFactor
+          };
+        
+          // Calculate the target zone points
+          const targetZonePoints = [
+            { x: elbowX + scaledPerpendicularVector.x, y: elbowY + scaledPerpendicularVector.y },
+            { x: elbowX - scaledPerpendicularVector.x, y: elbowY - scaledPerpendicularVector.y },
+            { x: wristX - scaledPerpendicularVector.x, y: wristY - scaledPerpendicularVector.y },
+            { x: wristX + scaledPerpendicularVector.x, y: wristY + scaledPerpendicularVector.y }
+          ];
+        
+          // Draw the target zone
+          ctx.beginPath();
+          ctx.setLineDash([5, 5]); // Create dashed line
+          ctx.strokeStyle = 'rgba(76, 201, 240, 0.5)'; // Light blue, more visible
+          ctx.lineWidth = 2;
+        
+          ctx.moveTo(targetZonePoints[0].x, targetZonePoints[0].y);
+          ctx.lineTo(targetZonePoints[1].x, targetZonePoints[1].y);
+          ctx.lineTo(targetZonePoints[2].x, targetZonePoints[2].y);
+          ctx.lineTo(targetZonePoints[3].x, targetZonePoints[3].y);
+          ctx.closePath();
+          ctx.stroke();
+        
+          // Reset line dash
+          ctx.setLineDash([]);
+        
+          // Add labels for start and end positions
+          ctx.font = 'bold 14px Poppins';
+          ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
+          ctx.textAlign = 'center';
+        
+          // Calculate positions for labels  
+          const startLabelX = isLeftSide ? targetZonePoints[1].x - 20 : targetZonePoints[0].x + 20;
+          const startLabelY = (targetZonePoints[0].y + targetZonePoints[1].y) / 2;
+          const endLabelX = isLeftSide ? targetZonePoints[2].x - 20 : targetZonePoints[3].x + 20;
+          const endLabelY = (targetZonePoints[2].y + targetZonePoints[3].y) / 2;
+        
+          ctx.fillText('Start', startLabelX, startLabelY);
+          ctx.fillText('End', endLabelX, endLabelY);
+        }
 
+        // Make sure to call this function in your onResults function
+        // Inside your onResults function where you process landmarks
+        if (results.poseLandmarks) {
+          // After drawing the skeleton but before other UI elements
+          if (armChoice === "left" || armChoice === "both") {
+            const lShoulder = results.poseLandmarks[11];
+            const lElbow = results.poseLandmarks[13];
+            const lWrist = results.poseLandmarks[15];
+            drawTargetZone(canvasCtx, lShoulder, lElbow, lWrist);
+          }
+          
+          if (armChoice === "right" || armChoice === "both") {
+            const rShoulder = results.poseLandmarks[12];
+            const rElbow = results.poseLandmarks[14];
+            const rWrist = results.poseLandmarks[16];
+            drawTargetZone(canvasCtx, rShoulder, rElbow, rWrist);
+          }
+        }
+        // Draw guidance for rep state
+        let instructionText = "";
+        if (rightRepStarted === 0) {
+          instructionText = "Start with arm extended";
+        } else if (rightRepStarted === 1) {
+          instructionText = "Curl arm upward";
+        } else if (rightRepStarted === 2) {
+          instructionText = "Lower arm back down";
+        }
+
+        canvasCtx.fillStyle = 'rgb(238, 215, 67)';
+        canvasCtx.font = 'bold 16px Poppins';
+        canvasCtx.textAlign = 'center';
+        canvasCtx.fillText(instructionText, textX, textY - 75);
+
+        // Check elbow drift in normal coords
         const sX = canvasElement.width - (rShoulder.x*canvasElement.width);
         const sY = rShoulder.y*canvasElement.height;
-        checkElbowDrift(canvasCtx, {x:sX,y:sY},{x:textX,y:textY});
+        const eDriftX = textX; 
+        const eDriftY = textY;
+        analyzeRangeOfMotion(canvasCtx, 
+          {x:sX, y:sY}, 
+          {x:eDriftX, y:eDriftY}, 
+          {x:textX, y:textY}
+        );
         canvasCtx.restore();
 
+        // Rep counting
         if (rightCount < targetReps) {
           trackRep(smoothedRightAngle, "right");
         }
       }
     }
 
+    // Draw general instruction at the top of the screen
+    canvasCtx.fillStyle = 'rgba(67, 97, 238, 1)';
+    canvasCtx.font = 'bold 20px Poppins';
+    canvasCtx.textAlign = 'center';
+    canvasCtx.fillText('Bicep Curls: Keep elbows close to body', canvasElement.width / 2, 30);
+
     updateUI();
+  }
+
+  // Add this block after drawing landmarks but before other UI elements
+  if (results.poseLandmarks && isResting) {
+    // Draw rest period information
+    canvasCtx.fillStyle = 'rgba(255, 255, 255, 0.9)';
+    canvasCtx.font = 'bold 30px Arial';
+    canvasCtx.textAlign = 'center';
+    canvasCtx.fillText(`Rest Period: ${restTimeRemaining} seconds`, canvasElement.width / 2, canvasElement.height / 2 - 40);
+    canvasCtx.fillText(`Next Set: ${currentSet + 1} of ${targetSets}`, canvasElement.width / 2, canvasElement.height / 2 + 40);
+    
+    // Draw progress bar for rest period
+    const barWidth = 400;
+    const barHeight = 20;
+    const barX = (canvasElement.width - barWidth) / 2;
+    const barY = canvasElement.height / 2;
+    const progress = (restBetweenSets - restTimeRemaining) / restBetweenSets;
+    
+    // Draw background bar
+    canvasCtx.fillStyle = 'rgba(200, 200, 200, 0.5)';
+    canvasCtx.fillRect(barX, barY, barWidth, barHeight);
+    
+    // Draw progress
+    canvasCtx.fillStyle = 'rgba(76, 201, 240, 0.9)';
+    canvasCtx.fillRect(barX, barY, barWidth * progress, barHeight);
+  }
+  
+  // Modify the "Press Start" condition to exclude rest periods
+  else if (results.poseLandmarks && !isAssessmentActive && !isCountdownRunning && !isResting) {
+    // Only show "Press Start" when not in rest period and not active
+    canvasCtx.fillStyle = 'rgba(255, 255, 255, 0.9)';
+    canvasCtx.font = 'bold 30px Arial';
+    canvasCtx.textAlign = 'center';
+    canvasCtx.fillText("Press Start to begin exercise", canvasElement.width / 2, canvasElement.height / 2);
   }
 }
 
@@ -698,3 +915,4 @@ setInterval(() => {
     startBtn.style.backgroundColor = '';
   }
 }, 1000);
+

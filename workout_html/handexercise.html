@@ -1,30 +1,116 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Hand Pose Detection</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.0/p5.js"></script>
-    <script src="https://unpkg.com/ml5@latest/dist/ml5.min.js"></script>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hand Opening and Closing Exercise</title>
+    <link rel="stylesheet" href="../css/common/common.css">
+    <link rel="stylesheet" href="../css/pages/workout.css">
     <link rel="stylesheet" href="../css/pages/handpose.css">
     
+    <!-- MediaPipe and TensorFlow.js -->
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-core"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-backend-webgl"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/hand-pose-detection"></script>
 </head>
 <body>
-    <div class="exercise-controls">
-        <h3>Exercise Settings</h3>
-        <select id="handSelect">
-            <option value="left">Left Hand</option>
-            <option value="right">Right Hand</option>
-            <option value="both">Both Hands</option>
-        </select>
-        <input type="number" id="repsInput" min="1" value="10" placeholder="Target Reps">
-        <button id="startExercise">Start Exercise</button>
-        <button id="resetExercise">Reset</button>
-    </div>
-    <div class="exercise-status">
-        <h3>Exercise Progress</h3>
-        <p id="repCount">Reps: 0 / 0</p>
-        <p id="exerciseStatus">Status: Not Started</p>
-    </div>
-    <script src="../js/handpose.js"></script>
+    <header class="sticky-header">
+        <nav>
+            <div class="logo">RehabHero</div>
+            <ul class="nav-links">
+                <li><a href="../dashboard.html" class="active">Home</a></li>
+                <li><a href="../exercise-library.html">Exercises</a></li>
+                <li><a href="../profile.html">Profile</a></li>
+                <li><a href="../teleconsultation.html">Teleconsultation</a></li>
+                <li><a href="#" onclick="logout()">Logout</a></li>
+            </ul>
+            <div class="menu-toggle" onclick="toggleMenu()">&#9776;</div>
+        </nav>
+    </header>
 
+    <div class="three-column-layout">
+        <!-- Left column: user controls -->
+        <div id="controls" class="left-column">
+            <h2>Hand Opening &amp; Closing Exercise</h2>
+            <p>Practice opening and closing your hand to improve dexterity and strength.</p>
+            
+            <div class="control-group">
+                <label for="handSelect">Select Hand:</label>
+                <select id="handSelect">
+                    <option value="left">Left Hand</option>
+                    <option value="right" selected>Right Hand</option>
+                    <option value="both">Both Hands</option>
+                </select>
+            </div>
+            
+            <div class="control-group">
+                <label for="repCountSelect">Number of Repetitions:</label>
+                <select id="repCountSelect">
+                    <option value="5">5 Reps</option>
+                    <option value="10" selected>10 Reps</option>
+                    <option value="15">15 Reps</option>
+                    <option value="20">20 Reps</option>
+                    <option value="30">30 Reps</option>
+                </select>
+            </div>
+            
+            <div class="control-group">
+                <button id="startExercise" class="primary-button">Start Exercise</button>
+                <button id="resetExercise" class="secondary-button">Reset</button>
+            </div>
+            
+            <div class="stats-display">
+                <p id="repCount">Reps: 0 / 10</p>
+                <p class="sets-display" id="setsDisplay">Sets: 1/1</p>
+                <p id="exerciseStatus">Status: Not Started</p>
+            </div>
+            
+            <div class="exercise-instructions-panel">
+                <h3>How to do this exercise:</h3>
+                <ol>
+                    <li>Position yourself so your hand is clearly visible</li>
+                    <li>When prompted, open your hand wide, spreading fingers</li>
+                    <li>Then close your hand into a gentle fist</li>
+                    <li>Repeat for the recommended number of repetitions</li>
+                </ol>
+            </div>
+        </div>
+        
+        <!-- Middle column: video feed -->
+        <div class="middle-column" id="canvasContainer">
+            <!-- Canvas will be added here by JS -->
+            <div class="loading-overlay" id="loadingOverlay">
+                <div class="spinner"></div>
+                <p>Loading exercise...</p>
+            </div>
+        </div>
+        
+        <!-- Right column: removed session statistics and exercise tips -->
+        <div class="right-column">
+            <div class="exercise-progress-card">
+                <h3>Exercise Progress</h3>
+                <div id="handProgress" class="rep-progress">
+                    <!-- Progress indicators will be added here by JS -->
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Script load at end of body -->
+    <script src="../js/handexercise.js"></script>
+    
+    <!-- Common site functions -->
+    <script>
+        function toggleMenu() {
+            document.querySelector('.nav-links').classList.toggle('show');
+        }
+        
+        function logout() {
+            // Implement logout functionality
+            alert('Logout function would go here');
+            window.location.href = '../index.html';
+        }
+    </script>
 </body>
 </html>

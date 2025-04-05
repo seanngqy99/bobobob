@@ -27,7 +27,7 @@
   /* Left side image */
   .login-image {
     flex: 1;
-    background-image: url('../../images/login-image.png');
+    background-image: url('../../images/login-image.jpg');
     background-size: cover;
     background-position: center;
     min-height: 500px;

@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stroke Rehabilitation Simon Says</title>
+    
+    <!-- Load MediaPipe and TensorFlow.js -->
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/pose"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-core"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-backend-webgl"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/pose-detection"></script>
+    
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #4ca1af 0%, #c4e0e5 100%);
+            color: #333;
+        }
+        
+        header {
+            width: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            padding: 1rem 0;
+            text-align: center;
+            margin-bottom: 1rem;
+        }
+        
+        h1 {
+            margin: 0;
+            font-size: 2.5rem;
+            color: white;
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+        }
+        
+        .game-container {
+            display: flex;
+            flex-direction: row;
+            gap: 20px;
+            max-width: 1200px;
+            width: 100%;
+            padding: 0 20px;
+            margin-bottom: 20px;
+        }
+        
+        .video-container {
+            position: relative;
+            width: 640px;
+            height: 480px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        
+        .game-panel {
+            background-color: rgba(255, 255, 255, 0.9);
+            border-radius: 10px;
+            padding: 20px;
+            width: 400px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .pose-display {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        
+        .pose-name {
+            font-size: 2rem;
+            font-weight: bold;
+            margin: 10px 0;
+            color: #2c3e50;
+        }
+        
+        .pose-image {
+            width: 240px;
+            height: 240px;
+            object-fit: contain;
+            margin: 10px auto;
+            display: block;
+            border: 3px solid #3498db;
+            border-radius: 10px;
+            background-color: #f8f9fa;
+        }
+        
+        .controls {
+            margin-top: 20px;
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
+        }
+        
+        button {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-size: 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            flex: 1;
+        }
+        
+        button:hover {
+            background-color: #2980b9;
+        }
+        
+        button:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+        
+        .timer {
+            font-size: 2.5rem;
+            text-align: center;
+            margin: 15px 0;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+        
+        .score-display {
+            display: flex;
+            justify-content: space-between;
+            margin: 10px 0;
+            font-size: 1.2rem;
+            color: #2c3e50;
+        }
+        
+        .feedback {
+            margin-top: 15px;
+            padding: 15px;
+            border-radius: 5px;
+            text-align: center;
+            min-height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
+            font-weight: 500;
+        }
+        
+        .feedback.success {
+            background-color: rgba(46, 204, 113, 0.2);
+            border: 1px solid #2ecc71;
+            color: #27ae60;
+        }
+        
+        .feedback.warning {
+            background-color: rgba(241, 196, 15, 0.2);
+            border: 1px solid #f1c40f;
+            color: #d35400;
+        }
+        
+        .feedback.error {
+            background-color: rgba(231, 76, 60, 0.2);
+            border: 1px solid #e74c3c;
+            color: #c0392b;
+        }
+        
+        .difficulty-selector {
+            margin-top: 15px;
+        }
+        
+        .difficulty-selector select {
+            width: 100%;
+            padding: 8px;
+            border-radius: 5px;
+            background-color: #f8f9fa;
+            color: #2c3e50;
+            border: 1px solid #bdc3c7;
+        }
+        
+        .simon-says-indicator {
+            font-size: 1.5rem;
+            text-align: center;
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+        
+        .simon-says-indicator.active {
+            background-color: rgba(46, 204, 113, 0.2);
+            color: #27ae60;
+        }
+        
+        .simon-says-indicator.inactive {
+            background-color: rgba(231, 76, 60, 0.2);
+            color: #c0392b;
+        }
+        
+        .loading-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            z-index: 10;
+        }
+        
+        .loader {
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid #3498db;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 2s linear infinite;
+            margin-bottom: 20px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .scoreboard {
+            margin-top: 20px;
+            width: 100%;
+            background-color: #f8f9fa;
+            border-radius: 10px;
+            padding: 15px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        .scoreboard h3 {
+            margin-top: 0;
+            text-align: center;
+            color: #2c3e50;
+        }
+        
+        .results-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        .results-table th, .results-table td {
+            padding: 8px;
+            text-align: left;
+            border-bottom: 1px solid #ecf0f1;
+        }
+        
+        .results-table th {
+            background-color: #3498db;
+            color: white;
+        }
+        
+        .results-table tr:nth-child(even) {
+            background-color: #f8f9fa;
+        }
+        
+        /* Debug panel for development */
+        .debug-panel {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            background-color: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 10px;
+            border-radius: 5px;
+            max-width: 300px;
+            z-index: 100;
+            font-size: 12px;
+            display: none;
+        }
+        
+        .debug-toggle {
+            position: fixed;
+            bottom: 10px;
+            right: 10px;
+            background-color: rgba(0, 0, 0, 0.5);
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 12px;
+            z-index: 100;
+        }
+        
+        /* Tooltip styles */
+        .tooltip {
+            position: relative;
+            display: inline-block;
+            margin-left: 10px;
+            color: #3498db;
+            cursor: pointer;
+        }
+        
+        .tooltip-text {
+            visibility: hidden;
+            width: 200px;
+            background-color: #34495e;
+            color: #fff;
+            text-align: center;
+            border-radius: 6px;
+            padding: 10px;
+            position: absolute;
+            z-index: 1;
+            bottom: 125%;
+            left: 50%;
+            margin-left: -100px;
+            opacity: 0;
+            transition: opacity 0.3s;
+            font-size: 14px;
+            font-weight: normal;
+        }
+        
+        .tooltip:hover .tooltip-text {
+            visibility: visible;
+            opacity: 1;
+        }
+        
+        @media (max-width: 1100px) {
+            .game-container {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .game-panel {
+                width: 90%;
+                max-width: 640px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Stroke Rehabilitation Simon Says</h1>
+    </header>
+    
+    <div class="game-container">
+        <div class="video-container" id="videoContainer">
+            <div class="loading-overlay" id="loadingOverlay">
+                <div class="loader"></div>
+                <p>Loading pose detection model...</p>
+            </div>
+        </div>
+        
+        <div class="game-panel">
+            <div class="simon-says-indicator" id="simonSaysIndicator">
+                Ready to start
+            </div>
+            
+            <div class="pose-display">
+                <div class="pose-name" id="poseName">Select Difficulty</div>
+                <img class="pose-image" id="poseImage" src="data:image/svg+xml;charset=UTF-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22240%22%20height%3D%22240%22%3E%3Crect%20fill%3D%22%23f8f9fa%22%20width%3D%22240%22%20height%3D%22240%22%2F%3E%3Ctext%20fill%3D%22%232c3e50%22%20font-family%3D%22Arial%22%20font-size%3D%2220%22%20x%3D%22120%22%20y%3D%22120%22%20text-anchor%3D%22middle%22%3EChoose%20a%20difficulty%20to%20begin%3C%2Ftext%3E%3C%2Fsvg%3E" alt="Rehabilitation exercise">
+            </div>
+            
+            <div class="timer" id="timer">00:00</div>
+            
+            <div class="score-display">
+                <span id="scoreDisplay">Score: 0</span>
+                <span id="roundDisplay">Round: 0/0</span>
+            </div>
+            
+            <div class="difficulty-selector">
+                <select id="difficultySelect">
+                    <option value="beginner">Level 1 (Mild)</option>
+                    <option value="intermediate" selected>Level 2 (Moderate)</option>
+                    <option value="advanced">Level 3 (Challenging)</option>
+                </select>
+                <div class="tooltip">ⓘ
+                    <span class="tooltip-text">Select a level based on your mobility range. Always consult with your physical therapist before starting.</span>
+                </div>
+            </div>
+            
+            <div class="controls">
+                <button id="startButton">Start Exercise</button>
+                <button id="skipButton" disabled>Skip Movement</button>
+            </div>
+            
+            <div class="feedback" id="feedback">
+                Choose level and press Start to begin exercise
+            </div>
+            
+            <div class="scoreboard">
+                <h3>Exercise Results</h3>
+                <table class="results-table">
+                    <thead>
+                        <tr>
+                            <th>Round</th>
+                            <th>Exercise</th>
+                            <th>Result</th>
+                            <th>Points</th>
+                        </tr>
+                    </thead>
+                    <tbody id="resultsTable">
+                        <!-- Results will be added here -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    
+    <div class="debug-panel" id="debugPanel"></div>
+    <button class="debug-toggle" id="debugToggle">Show Debug</button>
+    
+    <!-- Load the JavaScript file -->
+    <script src="../js/simonsays.js"></script>
+</body>
+</html>

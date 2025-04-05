@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Exercise Library - Bob.AI</title>
+    <title>Exercise Library - RehabHero</title>
     <link rel="stylesheet" href="css/common/common.css">
     <link rel="stylesheet" href="css/pages/exercise.css">
     <link rel="stylesheet" href="css/common/ai-assistant.css">
@@ -44,7 +44,7 @@
     <!-- Header Section -->
     <header>
         <nav>
-            <div class="logo">Bob.AI</div>
+            <div class="logo">RehabHero</div>
             <ul class="nav-links">
                 <li><a href="dashboard.html">Home</a></li>
                 <li><a href="exercise-library.html" class="active">Exercises</a></li>
@@ -154,7 +154,59 @@
                     </div>
                     <button onclick="startExercise('hand-exercise')" class="start-btn">Start Exercise</button>
                 </div>
+                <div class="exercise-card">
+                    <img src="images/finger-exercise.jpg" alt="Finger Exercise">
+                    <h3>Finger Exercise</h3>
+                    <div class="exercise-settings">
+                        <div class="setting-group">
+                            <label for="finger-exercise-sets">Sets:</label>
+                            <input type="number" id="finger-exercise-sets" value="3" min="1" max="10" class="setting-input">
+                        </div>
+                        
+                        <div class="setting-group">
+                            <label for="finger-exercise-reps">Reps:</label>
+                            <input type="number" id="finger-exercise-reps" value="5" min="1" max="20" class="setting-input">
+                        </div>
+                    </div>
+                    <button onclick="startExercise('finger-exercise')" class="start-btn">Start Exercise</button>
+                </div>
+    
+                <div class="exercise-card">
+                    <img src="images/front-raises.jpg" alt="Front Raises">
+                    <h3>Front Raises</h3>
+                    <div class="exercise-settings">
+                        <div class="setting-group">
+                            <label for="front-raises-sets">Sets:</label>
+                            <input type="number" id="front-raises-sets" value="3" min="1" max="10" class="setting-input">
+                        </div>
+                        
+                        <div class="setting-group">
+                            <label for="front-raises-reps">Reps:</label>
+                            <input type="number" id="front-raises-reps" value="5" min="1" max="20" class="setting-input">
+                        </div>
+                    </div>
+                    <button onclick="startExercise('front-raises')" class="start-btn">Start Exercise</button>
+                </div>
+    
+                <div class="exercise-card">
+                    <img src="images/head-tilts.jpg" alt="Head Tilts">
+                    <h3>Head Tilts</h3>
+                    <div class="exercise-settings">
+                        <div class="setting-group">
+                            <label for="head-tilts-sets">Sets:</label>
+                            <input type="number" id="head-tilts-sets" value="3" min="1" max="10" class="setting-input">
+                        </div>
+                        
+                        <div class="setting-group">
+                            <label for="head-tilts-reps">Reps:</label>
+                            <input type="number" id="head-tilts-reps" value="5" min="1" max="20" class="setting-input">
+                        </div>
+                    </div>
+                    <button onclick="startExercise('head-tilts')" class="start-btn">Start Exercise</button>
+                </div>
             </div>
+            
+        </div>
         </section>
         
         <!-- Interactive Games -->
@@ -178,6 +230,24 @@
                     <h3>Star Catcher</h3>
                     <p>Improve your reaction speed and hand-eye coordination.</p>
                     <button class="play-button" onclick="playGame('starcatchergame')">Play Now</button>
+                </div>
+                <div class="game-card">
+                    <img src="images/sign-language.png" alt="Sign Language">
+                    <h3>Sign Language</h3>
+                    <p>Learn and practice sign language through an interactive game.</p>
+                    <button class="play-button" onclick="playGame('sign-language')">Play Now</button>
+                </div>
+                <div class="game-card">
+                    <img src="images/racing-game.png" alt="Rehabilitation Racing">
+                    <h3>Rehabilitation Racing</h3>
+                    <p>Race against the clock while performing rehabilitation movements.</p>
+                    <button class="play-button" onclick="playGame('rehab-racing')">Play Now</button>
+                </div>
+                <div class="game-card">
+                    <img src="images/whack-a-mole.png" alt="Whack-a-Mole">
+                    <h3>Whack-a-Mole</h3>
+                    <p>Improve hand-eye coordination and reaction time with this classic game.</p>
+                    <button class="play-button" onclick="playGame('whack-a-mole')">Play Now</button>
                 </div>
             </div>
         </section>

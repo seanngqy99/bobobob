@@ -4,57 +4,74 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Bicep Curl Exercise</title>
+  <link rel="stylesheet" href="../css/common/common.css">
+  <link rel="stylesheet" href="../css/pages/workout.css">
 
   <!-- Mediapipe scripts -->
   <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@mediapipe/control_utils/control_utils.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@mediapipe/pose/pose.js"></script>
-
-  <!-- Custom styles -->
-  <link rel="stylesheet" href="../css/pages/workout.css">
 </head>
 <body>
-  <!-- Left side: user controls -->
-  <div id="controls">
-    <h2>Bicep Curl Exercise</h2>
+  <header class="sticky-header">
+    <nav>
+        <div class="logo">RehabHero</div>
+        <ul class="nav-links">
+            <li><a href="../dashboard.html" class="active">Home</a></li>
+            <li><a href="../exercise-library.html">Exercises</a></li>
+            <li><a href="../profile.html">Profile</a></li>
+            <li><a href="../teleconsultation.html">Teleconsultation</a></li>
+            <li><a href="#" onclick="logout()">Logout</a></li>
+        </ul>
+        <div class="menu-toggle" onclick="toggleMenu()">&#9776;</div>
+    </nav>
+  </header>
 
-    <!-- Arm selection -->
-    <label><input type="radio" name="armSelect" value="left" checked> Left Arm</label>
-    <label><input type="radio" name="armSelect" value="right"> Right Arm</label>
-    <label><input type="radio" name="armSelect" value="both"> Both Arms</label>
+  <div class="three-column-layout">
+    <!-- Left column: user controls -->
+    <div id="controls" class="left-column">
+      <h2>Bicep Curl Exercise</h2>
+      <p>This exercise builds bicep strength. Keep your arms close to you and curl your arms upward from an extended position to your shoulder, then lower them back down in a controlled motion.</p>
 
-    <!-- Number of reps -->
-    <label>Number of Reps: 
-      <input type="number" id="repInput" value="5" min="1" max="10">
-    </label>
+      <!-- Arm selection -->
+      <label><input type="radio" name="armSelect" value="left" checked> Left Arm</label>
+      <label><input type="radio" name="armSelect" value="right"> Right Arm</label>
+      <label><input type="radio" name="armSelect" value="both"> Both Arms</label>
 
-    <!-- Start button -->
-    <button id="startBtn">Start Exercise</button>
+      <!-- Start button -->
+      <button id="startBtn">Start Exercise</button>
 
-    <!-- Status / counters -->
-    <p id="leftCountText"></p>
-    <p id="rightCountText"></p>
-    <p id="statusText">Waiting to start...</p>
+      <!-- Status / counters -->
+      <p id="leftCountText"></p>
+      <p id="rightCountText"></p>
+      <p id="statusText">Waiting to start...</p>
+    </div>
+
+    <!-- Middle column: container with hidden video and the canvas -->
+    <div class="container middle-column">
+      <video class="input_video" playsinline></video>
+      <canvas class="output_canvas"></canvas>
+    </div>
     
-    <!-- Rep progress visualization -->
-    <div class="rep-progress-container">
-      <h3>Left Arm Progress</h3>
-      <div id="leftRepProgress" class="rep-progress">
-        <!-- Rep progress bars will be dynamically added here -->
-      </div>
-      
-      <h3>Right Arm Progress</h3>
-      <div id="rightRepProgress" class="rep-progress">
-        <!-- Rep progress bars will be dynamically added here -->
+    <!-- Right column: Rep progress visualization -->
+    <div class="right-column">
+      <div class="rep-progress-container">
+        <div class="rep-progress-left">
+          <h3>Left Arm Progress</h3>
+          <div id="leftRepProgress" class="rep-progress">
+            <!-- Rep progress bars will be dynamically added here -->
+          </div>
+        </div>
+        
+        <div class="rep-progress-right">
+          <h3>Right Arm Progress</h3>
+          <div id="rightRepProgress" class="rep-progress">
+            <!-- Rep progress bars will be dynamically added here -->
+          </div>
+        </div>
       </div>
     </div>
-  </div>
-
-  <!-- Right side: container with hidden video and the canvas -->
-  <div class="container">
-    <video class="input_video" playsinline></video>
-    <canvas class="output_canvas"></canvas>
   </div>
 
   <!-- Custom JavaScript -->

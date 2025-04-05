@@ -1,68 +1,203 @@
-        body {
-            margin: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            font-family: Arial, sans-serif;
-            background-color: #f0f2f5;
-        }
-        #status, #confidence {
-            position: fixed;
-            left: 20px;
-            background: rgba(255,255,255,0.8);
-            padding: 10px;
-            border-radius: 5px;
-            font-weight: bold;
-        }
-        #status { top: 20px; }
-        #confidence { top: 60px; }
-        canvas {
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            margin: 20px;
-        }
-        .instructions {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            background: rgba(255,255,255,0.9);
-            padding: 15px;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            max-width: 300px;
-        }
-        .exercise-controls {
-            position: fixed;
-            left: 20px;
-            bottom: 20px;
-            background: rgba(255,255,255,0.9);
-            padding: 15px;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-        .exercise-status {
-            position: fixed;
-            right: 20px;
-            bottom: 20px;
-            background: rgba(255,255,255,0.9);
-            padding: 15px;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-        button {
-            padding: 8px 16px;
-            margin: 5px;
-            border-radius: 4px;
-            border: none;
-            background: #4CAF50;
-            color: white;
-            cursor: pointer;
-        }
-        button:hover {
-            background: #45a049;
-        }
-        select, input {
-            padding: 5px;
-            margin: 5px;
-        }
+/* Hand Opening and Closing Exercise Styles */
+
+/* Progress indicator styles */
+.rep-indicator {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background-color: #e0e0e0;
+    display: inline-block;
+    margin: 5px;
+    position: relative;
+    transition: all 0.3s ease;
+}
+
+.rep-indicator.completed {
+    background-color: #4CAF50;
+    box-shadow: 0 0 10px rgba(76, 175, 80, 0.7);
+}
+
+.rep-indicator::after {
+    content: attr(data-rep);
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 12px;
+    font-weight: bold;
+    color: #333;
+}
+
+.rep-indicator.completed::after {
+    color: white;
+}
+
+.rep-progress {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin-top: 15px;
+}
+
+/* Hand state indicator */
+.hand-state-indicator {
+    position: absolute;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 10px 20px;
+    border-radius: 20px;
+    font-weight: bold;
+    transition: all 0.3s ease;
+    text-align: center;
+}
+
+.hand-state-open {
+    background-color: rgba(76, 175, 80, 0.8);
+    color: white;
+}
+
+.hand-state-closed {
+    background-color: rgba(255, 87, 34, 0.8);
+    color: white;
+}
+
+.hand-state-unknown {
+    background-color: rgba(0, 0, 0, 0.5);
+    color: white;
+}
+
+/* Loading overlay */
+.loading-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.7);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    z-index: 100;
+    color: white;
+}
+
+.spinner {
+    width: 50px;
+    height: 50px;
+    border: 5px solid rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    border-top-color: #fff;
+    animation: spin 1s ease-in-out infinite;
+    margin-bottom: 20px;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* Exercise instructions */
+.exercise-instructions {
+    position: absolute;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: rgba(0, 0, 0, 0.7);
+    color: white;
+    padding: 10px 20px;
+    border-radius: 20px;
+    font-size: 18px;
+    text-align: center;
+}
+
+/* Animation for successful rep */
+@keyframes successPulse {
+    0% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.5); opacity: 0.7; }
+    100% { transform: scale(1); opacity: 1; }
+}
+
+.success-pulse {
+    animation: successPulse 0.5s ease-in-out;
+}
+
+/* Hand selection buttons */
+.hand-selection {
+    display: flex;
+    justify-content: space-between;
+    margin: 15px 0;
+}
+
+.hand-btn {
+    flex: 1;
+    padding: 10px;
+    margin: 0 5px;
+    border: 2px solid #ddd;
+    background-color: #f9f9f9;
+    border-radius: 5px;
+    cursor: pointer;
+    text-align: center;
+    transition: all 0.3s ease;
+}
+
+.hand-btn.selected {
+    border-color: #3f51b5;
+    background-color: #e8eaf6;
+    color: #3f51b5;
+    font-weight: bold;
+}
+
+/* Canvas container enhancements */
+#canvasContainer {
+    position: relative;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+}
+
+canvas {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+/* Stats display */
+.exercise-stats {
+    margin-top: 20px;
+    background-color: #f5f5f5;
+    border-radius: 8px;
+    padding: 15px;
+}
+
+.stat-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 0;
+    border-bottom: 1px solid #eee;
+}
+
+.stat-item:last-child {
+    border-bottom: none;
+}
+
+.stat-label {
+    font-weight: bold;
+    color: #555;
+}
+
+.stat-value {
+    color: #3f51b5;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .hand-selection {
+        flex-direction: column;
+    }
+    
+    .hand-btn {
+        margin: 5px 0;
+    }
+}

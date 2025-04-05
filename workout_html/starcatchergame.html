@@ -1,250 +1,222 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
-  <title>Star Catcher Rehabilitation Game</title>
-  
-  <!-- MediaPipe scripts for Pose Detection -->
-  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/control_utils/control_utils.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/pose/pose.js"></script>
-  
-  <style>
-    /* Game-specific styles */
-    .game-container {
-      display: flex;
-      flex-direction: row;
-      width: 100%;
-      min-height: 100vh;
-      box-sizing: border-box;
-      align-items: flex-start;
-      padding: 20px;
-      font-family: Arial, sans-serif;
-    }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Star Catcher Game</title>
     
-    /* Controls panel on the left */
-    #controls {
-      width: 280px;
-      background-color: white;
-      border-radius: 10px;
-      padding: 20px;
-      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-      margin-right: 20px;
-      height: fit-content;
-    }
+    <!-- Load MediaPipe and TensorFlow.js -->
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-core"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-backend-webgl"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/hand-pose-detection"></script>
     
-    /* Game area (video + game elements) */
-    .game-area {
-      position: relative;
-      flex-grow: 1;
-      max-width: 800px;
-      aspect-ratio: 4/3;
-      border-radius: 10px;
-      overflow: hidden;
-      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-    }
-    
-    /* Video element */
-    #videoElement {
-      display: block;
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      transform: scaleX(-1); /* Mirror the video */
-    }
-    
-    /* Canvas for video and pose detection */
-    #outputCanvas {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      border-radius: 10px;
-      z-index: 5;
-    }
-    
-    /* Game canvas overlaid on top of video canvas */
-    #gameCanvas {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      border-radius: 10px;
-      z-index: 10;
-      pointer-events: none;
-    }
-    
-    /* Game metrics display */
-    .game-metrics {
-      background-color: #f9f9f9;
-      border-radius: 10px;
-      padding: 15px;
-      margin-top: 15px;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-    }
-    
-    .metric {
-      display: flex;
-      justify-content: space-between;
-      margin-bottom: 8px;
-      font-size: 16px;
-    }
-    
-    .metric-value {
-      font-weight: 600;
-      color: #5a67d8;
-    }
-    
-    /* Difficulty and mode selection */
-    .difficulty-selection, 
-    .game-mode-selection {
-      margin-bottom: 20px;
-      border-bottom: 1px solid #e9ecef;
-      padding-bottom: 15px;
-    }
-    
-    /* Start button */
-    #startButton {
-      width: 100%;
-      padding: 10px;
-      background-color: #5a67d8;
-      color: white;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-      transition: background-color 0.3s ease;
-    }
-    
-    #startButton:hover {
-      background-color: #4a50b8;
-    }
-    
-    /* Game over popup */
-    #gameOverOverlay {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      background-color: rgba(255, 255, 255, 0.9);
-      padding: 30px;
-      border-radius: 10px;
-      text-align: center;
-      box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-      z-index: 20;
-      display: none;
-    }
-    
-    /* Countdown display */
-    #countdownOverlay {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      font-size: 100px;
-      color: white;
-      text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
-      z-index: 15;
-      display: none;
-    }
-
-    /* Responsive design */
-    @media screen and (max-width: 768px) {
-      .game-container {
-        flex-direction: column;
-        align-items: center;
-      }
-      
-      #controls {
-        width: 100%;
-        max-width: 500px;
-        margin-right: 0;
-        margin-bottom: 20px;
-      }
-      
-      .game-area {
-        width: 100%;
-        max-width: 500px;
-      }
-    }
-  </style>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            color: white;
+        }
+        
+        header {
+            width: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            padding: 1rem 0;
+            text-align: center;
+            margin-bottom: 1rem;
+        }
+        
+        h1 {
+            margin: 0;
+            font-size: 2rem;
+            color: #ffd700;
+            text-shadow: 0 0 10px rgba(255, 215, 0, 0.7);
+        }
+        
+        .game-container {
+            position: relative;
+            width: 640px;
+            height: 480px;
+            margin: 0 auto;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        
+        .controls {
+            width: 640px;
+            margin: 1rem auto;
+            padding: 1rem;
+            background-color: rgba(0, 0, 0, 0.5);
+            border-radius: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .control-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        button {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        
+        button:hover {
+            background-color: #45a049;
+        }
+        
+        button:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+        
+        select {
+            padding: 8px;
+            border-radius: 5px;
+            background-color: #f0f0f0;
+            border: none;
+        }
+        
+        .score-display {
+            font-size: 18px;
+            font-weight: bold;
+            color: #ffd700;
+        }
+        
+        .time-display {
+            font-size: 18px;
+            font-weight: bold;
+            color: #ff6b6b;
+        }
+        
+        .status {
+            margin-top: 10px;
+            padding: 5px 10px;
+            background-color: rgba(0, 0, 0, 0.3);
+            border-radius: 5px;
+            font-style: italic;
+        }
+        
+        #loadingOverlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            z-index: 10;
+        }
+        
+        .loader {
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid #3498db;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 2s linear infinite;
+            margin-bottom: 20px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .instructions {
+            max-width: 640px;
+            margin: 1rem auto;
+            padding: 1rem;
+            background-color: rgba(255, 215, 0, 0.1);
+            border-radius: 10px;
+            border: 1px solid rgba(255, 215, 0, 0.3);
+        }
+        
+        .instructions h2 {
+            color: #ffd700;
+            margin-top: 0;
+        }
+        
+        .instructions ul {
+            padding-left: 20px;
+        }
+        
+        .instructions li {
+            margin-bottom: 8px;
+        }
+    </style>
 </head>
 <body>
-  <div class="game-container">
-    <!-- Left side: UI Controls -->
-    <div id="controls">
-      <h2>Star Collector Game</h2>
-      <p>Reach out and collect stars with your hands! Improve your range of motion in a fun way.</p>
-      
-      <!-- Difficulty selection -->
-      <div class="difficulty-selection">
-        <p>Select difficulty:</p>
-        <label>
-          <input type="radio" name="difficulty" value="easy" checked> Easy
-        </label>
-        <label>
-          <input type="radio" name="difficulty" value="medium"> Medium
-        </label>
-        <label>
-          <input type="radio" name="difficulty" value="hard"> Hard
-        </label>
-      </div>
-      
-      <!-- Game mode selection -->
-      <div class="game-mode-selection">
-        <p>Select game mode:</p>
-        <label>
-          <input type="radio" name="mode" value="timed" checked> Timed Mode (60s)
-        </label>
-        <label>
-          <input type="radio" name="mode" value="target"> Target Mode (30 stars)
-        </label>
-      </div>
-      
-      <!-- Start button -->
-      <button id="startButton">Start Game</button>
-      
-      <!-- Status text -->
-      <div id="statusText">Camera initializing...</div>
-      
-      <!-- Game metrics -->
-      <div class="game-metrics">
-        <div class="metric">
-          <span>Stars Collected:</span>
-          <span id="starsCollected" class="metric-value">0</span>
+    <header>
+        <h1>⭐ Star Catcher Game ⭐</h1>
+    </header>
+    
+    <div class="game-container" id="gameContainer">
+        <div id="loadingOverlay">
+            <div class="loader"></div>
+            <p>Loading hand tracking model...</p>
         </div>
-        <div class="metric">
-          <span>Time Remaining:</span>
-          <span id="timeRemaining" class="metric-value">60s</span>
-        </div>
-        <div class="metric">
-          <span>Score:</span>
-          <span id="scoreDisplay" class="metric-value">0</span>
-        </div>
-      </div>
     </div>
     
-    <!-- Right side: Game Area -->
-    <div class="game-area">
-      <video id="videoElement" playsinline></video>
-      <canvas id="outputCanvas"></canvas>
-      <canvas id="gameCanvas"></canvas>
-      <div id="countdownOverlay">3</div>
-      <div id="gameOverOverlay">
-        <h2>Game Over!</h2>
-        <p>Your score: <span id="finalScore">0</span></p>
-        <p>Stars collected: <span id="finalStars">0</span></p>
-        <button id="playAgainButton">Play Again</button>
-      </div>
+    <div class="controls">
+        <div class="control-group">
+            <label for="levelSelect">Difficulty:</label>
+            <select id="levelSelect">
+                <option value="easy">Easy</option>
+                <option value="medium" selected>Medium</option>
+                <option value="hard">Hard</option>
+            </select>
+        </div>
+        
+        <div class="control-group">
+            <span id="scoreDisplay" class="score-display">Score: 0</span>
+        </div>
+        
+        <div class="control-group">
+            <span id="timeDisplay" class="time-display">Time: 1:00</span>
+        </div>
+        
+        <div class="control-group">
+            <button id="startGame">Start Game</button>
+        </div>
     </div>
-  </div>
-  
-  <!-- Game Script -->
-  <script src="../js/starcatchergame.js"></script>
+    
+    <div class="status" id="gameStatus">Loading game...</div>
+    
+    <div class="instructions">
+        <h2>How to Play</h2>
+        <ul>
+            <li>Stars ⭐ will appear randomly on the screen</li>
+            <li>Close your hand on a star to catch it</li>
+            <li>Each caught star gives you one point</li>
+            <li>Stars will disappear after a few seconds if not caught</li>
+            <li>Try to catch as many stars as possible before time runs out!</li>
+            <li>Difficulty levels change how fast stars appear and disappear</li>
+        </ul>
+    </div>
+
+    <script src="../js/starcatchergame.js"></script>
 </body>
 </html>

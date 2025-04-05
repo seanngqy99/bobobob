@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BlazePose Landmarks</title>
+  <!-- Mediapipe scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/control_utils/control_utils.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/pose/pose.js"></script>
+  
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .container {
+      position: relative;
+      width: 640px;
+      height: 480px;
+    }
+    .input_video {
+      position: absolute;
+      display: none;
+    }
+    .output_canvas {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+    }
+    .controls {
+      margin-top: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      width: 640px;
+    }
+    #statusText {
+      margin-top: 10px;
+      font-weight: bold;
+      text-align: center;
+    }
+    button {
+      padding: 10px;
+      background-color: #4361ee;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #3a56d4;
+    }
+    button:disabled {
+      background-color: #adb5bd;
+      cursor: not-allowed;
+    }
+    #landmarkInfo {
+      margin-top: 20px;
+      max-width: 640px;
+      text-align: left;
+    }
+    .description {
+      margin-bottom: 15px;
+    }
+  </style>
+</head>
+<body>
+  <h1>BlazePose Landmarks</h1>
+  
+  <div class="container">
+    <video class="input_video"></video>
+    <canvas class="output_canvas"></canvas>
+  </div>
+  
+  <div class="controls">
+    <button id="startBtn">Start Tracking</button>
+    <div id="statusText">Loading camera...</div>
+  </div>
+
+  <div id="landmarkInfo">
+    <div class="description">
+      <p>This demo shows all 33 BlazePose landmarks with their index numbers.</p>
+    </div>
+  </div>
+
+  <script>
+    // DOM Elements
+    const videoElement = document.getElementsByClassName('input_video')[0];
+    const canvasElement = document.getElementsByClassName('output_canvas')[0];
+    const canvasCtx = canvasElement.getContext('2d');
+    const statusText = document.getElementById("statusText");
+    const startBtn = document.getElementById("startBtn");
+    
+    // Set canvas dimensions
+    canvasElement.width = 640;
+    canvasElement.height = 480;
+    
+    // Variables
+    let isTracking = false;
+    
+    // Landmark names for reference
+    const landmarkNames = [
+      "nose",               // 0
+      "left_eye_inner",     // 1
+      "left_eye",           // 2
+      "left_eye_outer",     // 3
+      "right_eye_inner",    // 4
+      "right_eye",          // 5
+      "right_eye_outer",    // 6
+      "left_ear",           // 7
+      "right_ear",          // 8
+      "mouth_left",         // 9
+      "mouth_right",        // 10
+      "left_shoulder",      // 11
+      "right_shoulder",     // 12
+      "left_elbow",         // 13
+      "right_elbow",        // 14
+      "left_wrist",         // 15
+      "right_wrist",        // 16
+      "left_pinky",         // 17
+      "right_pinky",        // 18
+      "left_index",         // 19
+      "right_index",        // 20
+      "left_thumb",         // 21
+      "right_thumb",        // 22
+      "left_hip",           // 23
+      "right_hip",          // 24
+      "left_knee",          // 25
+      "right_knee",         // 26
+      "left_ankle",         // 27
+      "right_ankle",        // 28
+      "left_heel",          // 29
+      "right_heel",         // 30
+      "left_foot_index",    // 31
+      "right_foot_index"    // 32
+    ];
+    
+    // Start button handler
+    function onStart() {
+      isTracking = !isTracking;
+      
+      if (isTracking) {
+        startBtn.textContent = "Stop Tracking";
+        statusText.textContent = "Pose tracking active - showing all 33 landmarks";
+      } else {
+        startBtn.textContent = "Start Tracking";
+        statusText.textContent = "Pose tracking paused";
+      }
+    }
+    
+    // The onResults callback => MIRROR the video
+    function onResults(results) {
+      // Clear & mirror the video feed
+      canvasCtx.save();
+      canvasCtx.clearRect(0, 0, canvasElement.width, canvasElement.height);
+      
+      // Mirror transform for the video and skeleton
+      canvasCtx.translate(canvasElement.width, 0);
+      canvasCtx.scale(-1, 1);
+      
+      // Draw the mirrored image
+      canvasCtx.drawImage(results.image, 0, 0, canvasElement.width, canvasElement.height);
+      
+      // Draw the skeleton mirrored
+      if (results.poseLandmarks && isTracking) {
+        // Draw connections
+        drawConnectors(canvasCtx, results.poseLandmarks, POSE_CONNECTIONS,
+          {color: 'rgba(67, 97, 238, 0.7)', lineWidth: 3});
+        
+        // Draw landmarks without numbers first
+        drawLandmarks(canvasCtx, results.poseLandmarks,
+          {color: 'rgba(247, 37, 133, 0.8)', lineWidth: 2, radius: 5});
+        
+        canvasCtx.restore();
+        
+        // Draw landmark numbers separately (not mirrored text)
+        if (results.poseLandmarks) {
+          for (let i = 0; i < results.poseLandmarks.length; i++) {
+            const landmark = results.poseLandmarks[i];
+            // Convert normalized coordinates to pixel coordinates (reversed for mirroring)
+            const x = canvasElement.width - (landmark.x * canvasElement.width);
+            const y = landmark.y * canvasElement.height;
+            
+            // Draw landmark number
+            canvasCtx.fillStyle = 'white';
+            canvasCtx.strokeStyle = 'black';
+            canvasCtx.lineWidth = 2;
+            canvasCtx.font = 'bold 14px Arial';
+            canvasCtx.textAlign = 'center';
+            canvasCtx.textBaseline = 'middle';
+            
+            // Draw text with outline for better visibility
+            canvasCtx.strokeText(i.toString(), x, y - 15);
+            canvasCtx.fillText(i.toString(), x, y - 15);
+          }
+        }
+      } else {
+        canvasCtx.restore();
+        
+        // Display instruction when not tracking
+        if (!isTracking) {
+          canvasCtx.fillStyle = 'rgba(255, 255, 255, 0.9)';
+          canvasCtx.font = 'bold 24px Arial';
+          canvasCtx.textAlign = 'center';
+          canvasCtx.fillText("Press Start Tracking to begin", canvasElement.width / 2, canvasElement.height / 2);
+        }
+      }
+    }
+    
+    // Setup the Pose
+    const pose = new Pose({
+      locateFile: (file) => {
+        return `https://cdn.jsdelivr.net/npm/@mediapipe/pose/${file}`;
+      }
+    });
+    
+    pose.setOptions({
+      modelComplexity: 1,
+      smoothLandmarks: true,
+      enableSegmentation: false,
+      smoothSegmentation: true,
+      minDetectionConfidence: 0.5,
+      minTrackingConfidence: 0.5
+    });
+    
+    pose.onResults(onResults);
+    
+    // Setup camera
+    const camera = new Camera(videoElement, {
+      onFrame: async () => {
+        await pose.send({image: videoElement});
+      },
+      width: 640,
+      height: 480
+    });
+    
+    // Start camera
+    camera.start()
+      .then(() => {
+        console.log('Camera started successfully.');
+        statusText.textContent = 'Camera ready. Press Start Tracking to begin.';
+      })
+      .catch(err => {
+        console.error('Error starting camera:', err);
+        statusText.textContent = 'Error accessing webcam. Please check camera permissions.';
+      });
+    
+    // Add event listener to Start button
+    startBtn.addEventListener('click', onStart);
+
+    // Create a reference list of landmarks
+    function createLandmarkList() {
+      const container = document.getElementById('landmarkInfo');
+      
+      // Create a table to display landmark indices and names
+      const table = document.createElement('table');
+      table.style.width = '100%';
+      table.style.borderCollapse = 'collapse';
+      table.style.marginTop = '10px';
+      
+      // Create header row
+      const headerRow = table.insertRow();
+      
+      const header1 = headerRow.insertCell(0);
+      header1.textContent = 'Index';
+      header1.style.fontWeight = 'bold';
+      header1.style.padding = '5px';
+      header1.style.borderBottom = '1px solid #ddd';
+      
+      const header2 = headerRow.insertCell(1);
+      header2.textContent = 'Landmark Name';
+      header2.style.fontWeight = 'bold';
+      header2.style.padding = '5px';
+      header2.style.borderBottom = '1px solid #ddd';
+      
+      // Add each landmark and its index to the table
+      for (let i = 0; i < landmarkNames.length; i++) {
+        const row = table.insertRow();
+        
+        const cell1 = row.insertCell(0);
+        cell1.textContent = i;
+        cell1.style.padding = '5px';
+        cell1.style.borderBottom = '1px solid #eee';
+        
+        const cell2 = row.insertCell(1);
+        cell2.textContent = landmarkNames[i];
+        cell2.style.padding = '5px';
+        cell2.style.borderBottom = '1px solid #eee';
+      }
+      
+      container.appendChild(table);
+    }
+    
+    // Create the landmark reference list when the page loads
+    document.addEventListener('DOMContentLoaded', createLandmarkList);
+  </script>
+</body>
+</html>
