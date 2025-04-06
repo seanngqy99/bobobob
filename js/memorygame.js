@@ -15,18 +15,18 @@ let currentLevel = 1;  // Default level
 
 // All symbols for the game
 const allSymbols = [
-    '🍎', '🍎', // Apple
-    '🍌', '🍌', // Banana
-    '🍒', '🍒', // Cherry
-    '🍇', '🍇', // Grapes
-    '🍊', '🍊', // Orange
-    '🍓', '🍓', // Strawberry
-    '🍉', '🍉', // Watermelon
-    '🥑', '🥑', // Avocado
-    '🍋', '🍋', // Lemon
-    '🥭', '🥭', // Mango
-    '🥝', '🥝', // Kiwi
-    '🍍', '🍍'  // Pineapple
+    '🐶', '🐶', // Dog
+    '🐱', '🐱', // Cat
+    '🐭', '🐭', // Mouse
+    '🐰', '🐰', // Rabbit
+    '🦊', '🦊', // Fox
+    '🐻', '🐻', // Bear
+    '🐼', '🐼', // Panda
+    '🦁', '🦁', // Lion
+    '🐯', '🐯', // Tiger
+    '🐨', '🐨', // Koala
+    '🐸', '🐸', // Frog
+    '🦄', '🦄'  // Unicorn
 ];
 
 // DOM elements
