@@ -10,9 +10,9 @@ if (!sessionStorage.getItem("isLoggedIn") && !window.location.pathname.includes(
 }
 
 // Wait for DOM to be loaded
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
   console.log("Exercise Library page initialized");
-  
+
   // Load today's program
   loadTodaysProgram();
 });
@@ -24,10 +24,10 @@ function loadTodaysProgram() {
     console.log("Program container not found");
     return;
   }
-  
+
   // Clear the container first to prevent duplicates
   programContainer.innerHTML = '';
-  
+
   // Get current user
   const userId = sessionStorage.getItem('userId');
   console.log("Current User ID:", userId);
@@ -48,7 +48,7 @@ function loadTodaysProgram() {
     "Arm Raises",
     "Bicep Curls",
     "Hand Exercise",
-    "Leg Extension", 
+    "Leg Extension",
     "Sit and Stand",
     "Finger Exercise",
     "Front Raises",
@@ -76,7 +76,7 @@ function loadTodaysProgram() {
   `;
 
   // Fetch recommended exercises from Firebase
-  const exercisePromises = exercisesToCheck.map(exerciseName => 
+  const exercisePromises = exercisesToCheck.map(exerciseName =>
     window.db.collection('Client').doc(userId)
       .collection('workout').doc(exerciseName)
       .get()
@@ -86,15 +86,15 @@ function loadTodaysProgram() {
     .then((snapshots) => {
       // Start building HTML with centered content
       let html = `<div class="centered-content"><h4>Recommended Exercises</h4>`;
-      
+
       // Process regular exercises (non-games)
       const regularExercises = snapshots
         .filter((doc, index) => {
           // Keep only documents that exist, have proper sets/reps, and are not Games
-          return doc.exists && 
-                 doc.data().sets > 0 && 
-                 doc.data().reps > 0 && 
-                 exercisesToCheck[index] !== "Games";
+          return doc.exists &&
+            doc.data().sets > 0 &&
+            doc.data().reps > 0 &&
+            exercisesToCheck[index] !== "Games";
         })
         .map((doc, index) => {
           const exerciseData = doc.data();
@@ -104,19 +104,19 @@ function loadTodaysProgram() {
             reps: exerciseData.reps
           };
         });
-      
+
       // Find the Games document if it exists
-      const gamesDoc = snapshots.find((doc, index) => 
+      const gamesDoc = snapshots.find((doc, index) =>
         doc.exists && exercisesToCheck[index] === "Games"
       );
-      
+
       // If no exercises and no games
       if (regularExercises.length === 0 && !gamesDoc) {
         html += `<p>No specific exercises found.</p></div>`;
         programContainer.innerHTML = html;
         return;
       }
-      
+
       // Build the HTML for regular exercises with details
       if (regularExercises.length > 0) {
         html += `<ul class="exercise-list">`;
@@ -128,17 +128,17 @@ function loadTodaysProgram() {
         });
         html += `</ul>`;
       }
-      
+
       // Add the Games section if the Games document exists
       if (gamesDoc) {
         const gameData = gamesDoc.data();
         console.log("Game data from Firebase:", gameData);
-        
+
         // Check if there's a game property or similar in the document
         if (gameData) {
           html += `<h4>Games</h4>`;
           html += `<ul class="exercise-list">`;
-          
+
           // If game is a string, display a single game
           if (typeof gameData.game === 'string') {
             html += `<li>
@@ -146,7 +146,7 @@ function loadTodaysProgram() {
                 <strong>${gameData.game}</strong>
               </a>
             </li>`;
-          } 
+          }
           // If there's a specific game name field
           else if (typeof gameData.name === 'string') {
             html += `<li>
@@ -164,17 +164,17 @@ function loadTodaysProgram() {
               </a>
             </li>`;
           }
-          
+
           html += `</ul>`;
         }
       }
-      
+
       // Close the centered-content div
       html += `</div>`;
-      
+
       // Update the program container only once
       programContainer.innerHTML = html;
-      
+
       // Add CSS for centering if it doesn't exist
       if (!document.getElementById('centered-styles')) {
         const style = document.createElement('style');
@@ -224,19 +224,19 @@ function startExercise(exerciseId) {
   // Get exercise parameters
   const setsInput = document.getElementById(`${exerciseId}-sets`);
   const repsInput = document.getElementById(`${exerciseId}-reps`);
-  
+
   /// Validate inputs
   const sets = setsInput ? parseInt(setsInput.value) : '';
   const reps = repsInput ? parseInt(repsInput.value) : '';
-  
+
   // Save selected parameters to sessionStorage
   sessionStorage.setItem('exerciseSets', sets);
   sessionStorage.setItem('exerciseReps', reps);
-  
+
   console.log(`Starting exercise: ${exerciseId} with ${sets} sets, ${reps} reps`);
-  
+
   // Redirect to the appropriate exercise page
-  switch(exerciseId) {
+  switch (exerciseId) {
     case 'bicep-curl':
       window.location.href = 'workout_html/bicep.html';
       break;
@@ -269,16 +269,16 @@ function startExercise(exerciseId) {
 // Game function
 function playGame(gameId) {
   console.log(`Launching game: ${gameId}`);
-  
+
   // Game routing based on ID
-  switch(gameId.toLowerCase()) {
-    
+  switch (gameId.toLowerCase()) {
+
     case 'memory-match':
       // Redirect to the memory match game
       window.location.href = 'workout_html/memorygame.html';
       break;
     case 'herosays':
-      window.location.href = 'workout_html/herosays.html';      
+      window.location.href = 'workout_html/herosays.html';
       break;
     case 'starcatchergame':
       window.location.href = 'workout_html/starcatchergame.html';

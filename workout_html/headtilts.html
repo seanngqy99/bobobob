@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Head Rotation Exercise</title>
+    <link rel="stylesheet" href="../css/common/common.css" />
+    <link rel="stylesheet" href="../css/pages/workout.css" />
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/control_utils/control_utils.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/face_mesh.js"></script>
+  </head>
+  <body>
+    <header class="sticky-header">
+      <nav>
+        <div class="logo">RehabHero</div>
+        <ul class="nav-links">
+          <li><a href="../dashboard.html" class="active">Home</a></li>
+          <li><a href="../exercise-library.html">Exercises</a></li>
+          <li><a href="../profile.html">Profile</a></li>
+          <li><a href="../teleconsultation.html">Teleconsultation</a></li>
+          <li><a href="#" onclick="logout()">Logout</a></li>
+        </ul>
+        <div class="menu-toggle" onclick="toggleMenu()">&#9776;</div>
+      </nav>
+    </header>
+
+    <div class="three-column-layout">
+      <div id="controls" class="left-column">
+        <h2>Head Rotation Exercise</h2>
+        <p>
+          This exercise improves neck mobility. Rotate your head to the side in
+          a controlled motion, then return to center.
+        </p>
+
+        <label
+          ><input type="radio" name="tiltSelect" value="left" checked /> Left
+          Rotation</label
+        >
+        <label
+          ><input type="radio" name="tiltSelect" value="right" /> Right
+          Rotation</label
+        >
+        <label
+          ><input type="radio" name="tiltSelect" value="both" /> Both
+          Directions</label
+        >
+
+        <button id="startBtn">Start Exercise</button>
+
+        <p id="leftCountText"></p>
+        <p id="rightCountText"></p>
+        <p id="statusText">Waiting to start...</p>
+      </div>
+
+      <div class="container middle-column">
+        <video class="input_video" playsinline></video>
+        <canvas class="output_canvas"></canvas>
+      </div>
+
+      <div class="right-column">
+        <div class="rep-progress-container">
+          <div class="rep-progress-left">
+            <h3>Left Rotation Progress</h3>
+            <div id="leftRepProgress" class="rep-progress"></div>
+          </div>
+
+          <div class="rep-progress-right">
+            <h3>Right Rotation Progress</h3>
+            <div id="rightRepProgress" class="rep-progress"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script src="../js/headtilts.js"></script>
+  </body>
+</html>
