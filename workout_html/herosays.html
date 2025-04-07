@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hero Pose - Rehabilitation Exercise</title>
+  <!-- Mediapipe scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/control_utils/control_utils.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/pose/pose.js"></script>
+  
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Bangers&family=Roboto:wght@400;700&display=swap');
+    
+    :root {
+      --primary-color: #e23636; /* Hero red */
+      --secondary-color: #0476F2; /* Hero blue */
+      --accent-color: #FFD700; /* Gold */
+      --dark-bg: #111111;
+      --light-text: #FFFFFF;
+      --success-color: #00C853;
+      --failure-color: #FF3D00;
+    }
+    
+    body {
+      font-family: 'Roboto', sans-serif;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+      background-image: url('https://i.imgur.com/JYfOSW0.jpg'); /* Replace with preferred hero background */
+      background-size: cover;
+      background-position: center;
+      background-attachment: fixed;
+      color: var(--light-text);
+      position: relative;
+    }
+    
+    body::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: rgba(0, 0, 0, 0.7);
+      z-index: -1;
+    }
+    
+    header {
+      width: 100%;
+      background-color: var(--primary-color);
+      padding: 1rem 0;
+      text-align: center;
+      margin-bottom: 1rem;
+      box-shadow: 0 4px 15px rgba(226, 54, 54, 0.5);
+      position: relative;
+      overflow: hidden;
+    }
+    
+    header::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      right: 0;
+      bottom: 0;
+      left: 0;
+      background: linear-gradient(45deg, transparent 40%, rgba(255, 255, 255, 0.2) 50%, transparent 60%);
+      background-size: 200% 200%;
+      animation: shine 3s infinite;
+    }
+    
+    @keyframes shine {
+      0% {background-position: 200% 0;}
+      100% {background-position: -200% 0;}
+    }
+    
+    h1 {
+      margin: 0;
+      font-family: 'Bangers', cursive;
+      font-size: 3rem;
+      color: var(--light-text);
+      text-shadow: 3px 3px 0 #000, -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000;
+      letter-spacing: 2px;
+    }
+    
+    .subtitle {
+      font-size: 1.2rem;
+      margin-top: 5px;
+      color: var(--light-text);
+      font-weight: 400;
+    }
+    
+    /* Instructions at the top */
+    .instructions {
+      max-width: 1200px;
+      width: 95%;
+      margin: 1rem auto;
+      padding: 1.5rem;
+      background-color: rgba(0, 0, 0, 0.7);
+      border-radius: 15px;
+      border: 2px solid var(--accent-color);
+      box-shadow: 0 0 15px rgba(255, 215, 0, 0.3);
+    }
+    
+    .instructions h2 {
+      color: var(--accent-color);
+      margin-top: 0;
+      font-family: 'Bangers', cursive;
+      font-size: 28px;
+      letter-spacing: 1px;
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    
+    .instructions ul {
+      padding-left: 20px;
+      columns: 2;
+    }
+    
+    .instructions li {
+      margin-bottom: 12px;
+      position: relative;
+      padding-left: 10px;
+      break-inside: avoid;
+    }
+    
+    .instructions li::before {
+      content: '⚡';
+      position: absolute;
+      left: -20px;
+      color: var(--accent-color);
+    }
+    
+    /* Main content layout */
+    .main-container {
+      display: flex;
+      flex-direction: row;
+      width: 1200px;
+      max-width: 95%;
+      margin: 0 auto;
+      gap: 20px;
+    }
+    
+    /* Left side - video container */
+    .video-container {
+      position: relative;
+      flex: 1;
+      height: 480px;
+      border-radius: 15px;
+      overflow: hidden;
+      box-shadow: 0 0 30px rgba(4, 118, 242, 0.6);
+      background-color: #000;
+      border: 4px solid var(--secondary-color);
+    }
+    
+    .input_video {
+      position: absolute;
+      display: none;
+    }
+    
+    .output_canvas {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+    }
+    
+    /* Right side - hero says container */
+    .hero-says-container {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .game-status-container {
+      background-color: rgba(0, 0, 0, 0.7);
+      border-radius: 15px;
+      padding: 1.5rem;
+      width: 100%;
+      box-sizing: border-box;
+      border: 2px solid var(--secondary-color);
+      box-shadow: 0 0 15px rgba(4, 118, 242, 0.4);
+      margin-bottom: 20px;
+      flex-grow: 1;
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .game-status {
+      font-size: 28px;
+      font-weight: bold;
+      margin-bottom: 15px;
+      text-align: center;
+      color: var(--accent-color);
+      font-family: 'Bangers', cursive;
+      letter-spacing: 1px;
+    }
+    
+    .instruction-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin-bottom: 20px;
+      flex-grow: 1;
+    }
+    
+    .instruction {
+      font-size: 32px;
+      font-weight: bold;
+      color: var(--light-text);
+      text-align: center;
+      margin-bottom: 20px;
+      min-height: 48px;
+      font-family: 'Bangers', cursive;
+      letter-spacing: 1px;
+      text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+    }
+    
+    .pose-image {
+      width: 180px;
+      height: 240px;
+      object-fit: cover;
+      margin-bottom: 20px;
+      border-radius: 15px;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.7);
+      border: 3px solid var(--accent-color);
+      transition: all 0.3s;
+    }
+    
+    .pose-image:hover {
+      transform: scale(1.05);
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.8);
+    }
+    
+    .feedback {
+      font-size: 24px;
+      font-weight: bold;
+      min-height: 42px;
+      margin: 15px 0;
+      text-align: center;
+      font-family: 'Bangers', cursive;
+      letter-spacing: 1px;
+      text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+    }
+    
+    .success {
+      color: var(--success-color);
+    }
+    
+    .failure {
+      color: var(--failure-color);
+    }
+    
+    .controls {
+      width: 100%;
+      padding: 1rem;
+      background-color: rgba(0, 0, 0, 0.7);
+      border-radius: 15px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 10px;
+      border: 2px solid var(--primary-color);
+      box-shadow: 0 0 15px rgba(226, 54, 54, 0.4);
+      box-sizing: border-box;
+    }
+    
+    .control-group {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+    
+    .score-display {
+      font-size: 22px;
+      font-weight: bold;
+      color: var(--accent-color);
+      background-color: rgba(0, 0, 0, 0.6);
+      padding: 10px 20px;
+      border-radius: 50px;
+      box-shadow: 0 3px 10px rgba(0, 0, 0, 0.3);
+      display: inline-block;
+    }
+    
+    button {
+      background-color: var(--secondary-color);
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      text-align: center;
+      font-size: 16px;
+      font-weight: bold;
+      border-radius: 50px;
+      cursor: pointer;
+      transition: all 0.3s;
+      text-transform: uppercase;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+      position: relative;
+      overflow: hidden;
+    }
+    
+    button::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(rgba(255, 255, 255, 0.2), transparent);
+      transition: all 0.3s;
+    }
+    
+    button:hover {
+      background-color: #0362cc;
+      transform: translateY(-3px);
+      box-shadow: 0 6px 12px rgba(0, 0, 0, 0.4);
+    }
+    
+    button:hover::after {
+      opacity: 0;
+    }
+    
+    button:active {
+      transform: translateY(1px);
+    }
+    
+    button:disabled {
+      background-color: #cccccc;
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
+    }
+    
+    #startGameBtn, #playAgainBtn {
+      background-color: var(--primary-color);
+      font-size: 18px;
+      padding: 15px 30px;
+    }
+    
+    #startGameBtn:hover, #playAgainBtn:hover {
+      background-color: #c62828;
+    }
+    
+    .overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      background: radial-gradient(circle, rgba(0, 0, 0, 0.7) 0%, rgba(0, 0, 0, 0.9) 100%);
+      color: white;
+      z-index: 10;
+      border-radius: 15px;
+    }
+    
+    .overlay h2 {
+      font-size: 42px;
+      margin-bottom: 20px;
+      color: var(--primary-color);
+      text-shadow: 0 0 10px rgba(226, 54, 54, 0.7);
+      font-family: 'Bangers', cursive;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+    }
+    
+    .overlay p {
+      font-size: 22px;
+      margin-bottom: 30px;
+      max-width: 80%;
+      text-align: center;
+    }
+    
+    .loader {
+      border: 5px solid rgba(255, 255, 255, 0.2);
+      border-top: 5px solid var(--primary-color);
+      border-right: 5px solid var(--secondary-color);
+      border-bottom: 5px solid var(--accent-color);
+      border-radius: 50%;
+      width: 60px;
+      height: 60px;
+      animation: spin 1.5s linear infinite;
+      margin-bottom: 30px;
+      box-shadow: 0 0 15px rgba(255, 255, 255, 0.1);
+    }
+    
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    
+    .next-pose-btn {
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      padding: 12px 25px;
+      text-align: center;
+      font-size: 18px;
+      border-radius: 8px;
+      cursor: pointer;
+      margin-top: 15px;
+      margin-bottom: 15px;
+      font-weight: bold;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+      transition: all 0.3s;
+    }
+    
+    .next-pose-btn:hover {
+      background-color: #45a049;
+      transform: translateY(-2px);
+      box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+    }
+    
+    /* Responsive design */
+    @media (max-width: 1000px) {
+      .main-container {
+        flex-direction: column;
+      }
+      
+      .video-container {
+        margin-bottom: 20px;
+        height: 400px;
+      }
+      
+      .instructions ul {
+        columns: 1;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>🦸‍♂️ HERO POSE CHALLENGE 🦸‍♀️</h1>
+    <div class="subtitle">Rehabilitation Exercise Game</div>
+  </header>
+  
+  <!-- Instructions at the top -->
+  <div class="instructions">
+    <h2>Hero Training Protocol</h2>
+    <ul>
+      <li>When the Commander says "HERO POSE", you must strike the pose shown in the image</li>
+      <li>If the Commander doesn't say "HERO POSE" before a command, remain still!</li>
+      <li>Match your stance to the reference image to complete each exercise</li>
+      <li>Take your time - there is no timer, this is rehabilitation training</li>
+      <li>Earn hero points for each successful pose you complete</li>
+      <li>You have 3 Super Skips for particularly challenging poses</li>
+      <li>This training helps improve mobility, balance, and coordination</li>
+      <li>Remember: Progress at your own pace - you are the hero of your recovery journey!</li>
+    </ul>
+  </div>
+  
+  <!-- Main container with side-by-side layout -->
+  <div class="main-container">
+    <!-- Left side - Video container -->
+    <div class="video-container">
+      <video class="input_video"></video>
+      <canvas class="output_canvas"></canvas>
+      <div id="startOverlay" class="overlay">
+        <div class="loader"></div>
+        <h2>Hero Training</h2>
+        <p>Follow the hero poses when commanded! This training helps your rehabilitation journey.</p>
+        <button id="startGameBtn">Begin Training</button>
+      </div>
+      <div id="gameOverOverlay" class="overlay" style="display: none;">
+        <h2>Session Complete!</h2>
+        <p>Your hero score: <span id="finalScore">0</span></p>
+        <p>Great progress on your recovery journey!</p>
+        <button id="playAgainBtn">Train Again</button>
+      </div>
+    </div>
+    
+    <!-- Right side - Hero Says container -->
+    <div class="hero-says-container">
+      <div class="game-status-container">
+        <div class="game-status">Prepare For Hero Training!</div>
+        <div class="instruction-container">
+          <div class="instruction"></div>
+          <img id="poseImage" class="pose-image" style="display: none;">
+        </div>
+        <div class="feedback"></div>
+      </div>
+      
+      <div class="controls">
+        <div class="control-group">
+          <span id="scoreDisplay" class="score-display">Hero Score: <span id="scoreValue">0</span></span>
+        </div>
+        
+        <div class="control-group">
+          <button id="skipBtn" disabled>Super Skip <span id="skipsRemaining">(3 remaining)</span></button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Include the JavaScript file (you'll need to update this path to your JS file) -->
+  <script src="../js/herosays.js"></script>
+</body>
+</html>

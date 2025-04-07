@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Voice Snake Game</title>
+  <!-- P5.js for game rendering -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.1/p5.min.js"></script>
+  
+  <!-- TensorFlow.js for speech recognition -->
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/speech-commands"></script>
+  
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #1e3c35 0%, #2d6a4f 100%);
+      color: white;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+    }
+    
+    header {
+      width: 100%;
+      background-color: rgba(0, 0, 0, 0.4);
+      padding: 1rem 0;
+      text-align: center;
+      margin-bottom: 1rem;
+    }
+    
+    h1 {
+      margin: 0;
+      font-size: 2.5rem;
+      color: #52b788;
+      text-shadow: 0 0 10px rgba(82, 183, 136, 0.7);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 15px;
+    }
+    
+    .game-icon, .mic-icon {
+      font-size: 2rem;
+      margin-top: 5px;
+    }
+    
+    .game-container {
+      width: 500px;
+      height: 500px;
+      border: 2px solid #52b788;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 0 15px rgba(82, 183, 136, 0.4);
+      position: relative;
+      background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><rect width="100" height="100" fill="%2340916c"/><g fill="%2352b788"><circle cx="10" cy="10" r="2"/><circle cx="30" cy="10" r="1"/><circle cx="50" cy="10" r="2"/><circle cx="70" cy="10" r="1"/><circle cx="90" cy="10" r="2"/><circle cx="20" cy="20" r="1.5"/><circle cx="40" cy="20" r="2"/><circle cx="60" cy="20" r="1"/><circle cx="80" cy="20" r="1.5"/><circle cx="10" cy="30" r="1"/><circle cx="30" cy="30" r="2"/><circle cx="50" cy="30" r="1.5"/><circle cx="70" cy="30" r="2"/><circle cx="90" cy="30" r="1"/><circle cx="20" cy="40" r="2"/><circle cx="40" cy="40" r="1"/><circle cx="60" cy="40" r="2"/><circle cx="80" cy="40" r="1.5"/><circle cx="10" cy="50" r="1.5"/><circle cx="30" cy="50" r="1"/><circle cx="50" cy="50" r="2"/><circle cx="70" cy="50" r="1"/><circle cx="90" cy="50" r="2"/><circle cx="20" cy="60" r="1"/><circle cx="40" cy="60" r="2"/><circle cx="60" cy="60" r="1.5"/><circle cx="80" cy="60" r="1"/><circle cx="10" cy="70" r="2"/><circle cx="30" cy="70" r="1.5"/><circle cx="50" cy="70" r="1"/><circle cx="70" cy="70" r="2"/><circle cx="90" cy="70" r="1.5"/><circle cx="20" cy="80" r="1.5"/><circle cx="40" cy="80" r="1"/><circle cx="60" cy="80" r="2"/><circle cx="80" cy="80" r="1"/><circle cx="10" cy="90" r="1"/><circle cx="30" cy="90" r="2"/><circle cx="50" cy="90" r="1"/><circle cx="70" cy="90" r="1.5"/><circle cx="90" cy="90" r="2"/></g></svg>');
+      background-repeat: repeat;
+    }
+    
+    #game-canvas {
+      display: block;
+    }
+    
+    .controls {
+      width: 500px;
+      padding: 1rem;
+      margin: 1rem 0;
+      background-color: rgba(0, 0, 0, 0.4);
+      border-radius: 8px;
+      border: 1px solid #2d6a4f;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    .score-container {
+      font-size: 1.2rem;
+      font-weight: bold;
+      display: flex;
+      gap: 20px;
+    }
+    
+    .current-score {
+      color: #fff;
+    }
+    
+    .high-score {
+      color: #d8e2dc;
+    }
+    
+    .difficulty-buttons {
+      display: flex;
+      gap: 10px;
+    }
+    
+    .difficulty-btn {
+      padding: 5px 15px;
+      background-color: #1e3c35;
+      color: white;
+      border: 1px solid #52b788;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    
+    .difficulty-btn.active {
+      background-color: #52b788;
+      color: #1e3c35;
+    }
+    
+    .button {
+      padding: 5px 15px;
+      background-color: #52b788;
+      color: #1e3c35;
+      border: none;
+      border-radius: 4px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    
+    .button:hover, .difficulty-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
+    
+    .button:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
+    }
+    
+    .speech-status {
+      width: 500px;
+      padding: 1rem;
+      margin-bottom: 1rem;
+      background-color: rgba(0, 0, 0, 0.4);
+      border-radius: 8px;
+      border: 1px solid #2d6a4f;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    
+    .status-container {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+    
+    .status-indicator {
+      width: 15px;
+      height: 15px;
+      border-radius: 50%;
+      background-color: #52b788;
+      animation: pulse 1.5s infinite;
+    }
+    
+    @keyframes pulse {
+      0% {
+        transform: scale(0.95);
+        box-shadow: 0 0 0 0 rgba(82, 183, 136, 0.7);
+      }
+      
+      70% {
+        transform: scale(1);
+        box-shadow: 0 0 0 8px rgba(82, 183, 136, 0);
+      }
+      
+      100% {
+        transform: scale(0.95);
+        box-shadow: 0 0 0 0 rgba(82, 183, 136, 0);
+      }
+    }
+    
+    .confidence-bar {
+      width: 100%;
+      height: 8px;
+      background-color: rgba(255, 255, 255, 0.2);
+      border-radius: 4px;
+      overflow: hidden;
+    }
+    
+    .confidence-level {
+      height: 100%;
+      width: 0%;
+      background-color: #52b788;
+      transition: width 0.3s ease;
+    }
+    
+    .instructions {
+      width: 500px;
+      padding: 1rem;
+      background-color: rgba(82, 183, 136, 0.1);
+      border-radius: 8px;
+      border: 1px solid rgba(82, 183, 136, 0.3);
+      margin-bottom: 2rem;
+    }
+    
+    .instructions h2 {
+      color: #52b788;
+      margin-top: 0;
+      margin-bottom: 15px;
+    }
+    
+    .instructions ul {
+      padding-left: 20px;
+      margin: 0;
+    }
+    
+    .instructions li {
+      margin-bottom: 10px;
+    }
+    
+    .subtitle {
+      color: #52b788;
+      font-weight: bold;
+      margin-top: 15px;
+      margin-bottom: 5px;
+    }
+    
+    .power-up {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-left: 10px;
+    }
+    
+    .power-up-indicator {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+    }
+    
+    .red-pill {
+      background-color: #ff6b6b;
+    }
+    
+    .blue-pill {
+      background-color: #48dbfb;
+    }
+    
+    .purple-pill {
+      background-color: #a55eea;
+    }
+    
+    #loading-screen {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: #1e3c35;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+    }
+    
+    .loader {
+      width: 50px;
+      height: 50px;
+      border: 5px solid rgba(82, 183, 136, 0.3);
+      border-radius: 50%;
+      border-top-color: #52b788;
+      animation: spin 1s linear infinite;
+      margin-bottom: 20px;
+    }
+    
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    
+    .overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.8);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      z-index: 100;
+    }
+    
+    .overlay h2 {
+      color: #52b788;
+      font-size: 2rem;
+      margin-bottom: 1rem;
+      text-align: center;
+    }
+    
+    .overlay p {
+      color: white;
+      font-size: 1.2rem;
+      margin-bottom: 1.5rem;
+      text-align: center;
+      max-width: 80%;
+    }
+    
+    @media (max-width: 600px) {
+      .game-container, .controls, .speech-status, .instructions {
+        width: 90%;
+      }
+      
+      .controls {
+        flex-direction: column;
+        gap: 15px;
+      }
+      
+      h1 {
+        font-size: 1.8rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div id="loading-screen">
+    <div class="loader"></div>
+    <h2>Loading Game...</h2>
+  </div>
+
+  <header>
+    <h1>
+      <span class="game-icon">🐍</span>
+      Voice Snake Game
+      <span class="mic-icon">🎙️</span>
+    </h1>
+  </header>
+  
+  <div class="game-container">
+    <div id="game-canvas"></div>
+    
+    <!-- Start Overlay -->
+    <div id="startOverlay" class="overlay">
+      <h2>Snake Muncher</h2>
+      <p>Control the snake with your voice by saying "UP", "DOWN", "LEFT", or "RIGHT"</p>
+      <p>This game requires microphone access</p>
+      <button id="startBtn" class="button">Start Game</button>
+    </div>
+    
+    <!-- Game Over Overlay -->
+    <div id="gameOverOverlay" class="overlay" style="display: none;">
+      <h2>Game Over!</h2>
+      <p>Your score: <span id="finalScore">0</span></p>
+      <p>Better luck next time!</p>
+      <button id="restartBtn" class="button">Play Again</button>
+    </div>
+  </div>
+  
+  <div class="controls">
+    <div class="score-container">
+      <div class="current-score">Score: <span id="currentScore">0</span></div>
+      <div class="high-score">High Score: <span id="highScore">0</span></div>
+    </div>
+    
+    <button class="button" id="pauseBtn">Pause</button>
+  </div>
+  
+  <div class="speech-status">
+    <div class="status-container">
+      <div class="status-indicator"></div>
+      <div>Detected: <span id="detectedCommand">Waiting...</span></div>
+    </div>
+    <div class="confidence-bar">
+      <div class="confidence-level" id="confidenceLevel"></div>
+    </div>
+  </div>
+  
+  <div class="instructions">
+    <h2>How to Play</h2>
+    
+    <div class="subtitle">Voice Commands:</div>
+    <ul>
+      <li>Say <strong>"UP"</strong> to move the snake upward</li>
+      <li>Say <strong>"DOWN"</strong> to move the snake downward</li>
+      <li>Say <strong>"LEFT"</strong> to move the snake left</li>
+      <li>Say <strong>"RIGHT"</strong> to move the snake right</li>
+    </ul>
+    
+    <div class="subtitle">Button Controls:</div>
+    <ul>
+      <li>Click <strong>Start Game</strong> to begin</li>
+      <li>Click <strong>Pause</strong> to pause the game</li>
+      <li>Click <strong>Play Again</strong> after game over to restart</li>
+    </ul>
+    
+    <div class="subtitle">Game Rules:</div>
+    <ul>
+      <li>Collect the red apples to grow and score points</li>
+      <li>Avoid hitting the walls and yourself</li>
+      <li>Special power-ups appear randomly:</li>
+      <li class="power-up"><div class="power-up-indicator red-pill"></div> Red pill: Speed boost</li>
+      <li class="power-up"><div class="power-up-indicator blue-pill"></div> Blue pill: Slow motion</li>
+      <li class="power-up"><div class="power-up-indicator purple-pill"></div> Purple pill: Ghost mode (pass through walls once)</li>
+    </ul>
+  </div>
+
+  <!-- Load the game script -->
+  <script src="../js/snakegame.js"></script>
+</body>
+</html>

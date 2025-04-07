@@ -272,21 +272,19 @@ function playGame(gameId) {
   
   // Game routing based on ID
   switch(gameId.toLowerCase()) {
-    case 'games':
-    case 'memory':
-    case 'memory-game':
+    
     case 'memory-match':
       // Redirect to the memory match game
       window.location.href = 'workout_html/memorygame.html';
       break;
-    case 'reaction-time':
-      window.location.href = 'workout_html/simonsays.html';      
+    case 'herosays':
+      window.location.href = 'workout_html/herosays.html';      
       break;
     case 'starcatchergame':
       window.location.href = 'workout_html/starcatchergame.html';
       break;
-    case 'sign-language':
-      window.location.href = 'workout_html/signlanguage.html';
+    case 'snakegame':
+      window.location.href = 'workout_html/snakegame.html';
       break;
     default:
       alert(`Game "${gameId}" would launch here. This feature is coming soon!`);
