@@ -100,8 +100,8 @@ function loadCalendarData(date) {
     return;
   }
   
-  const userName = sessionStorage.getItem('user');
-  if (!userName) return;
+  const userId = sessionStorage.getItem('userId');
+  if (!userId) return;
   
   const year = date.getFullYear();
   const month = date.getMonth();
@@ -109,36 +109,67 @@ function loadCalendarData(date) {
   // First, update the calendar grid with the correct dates
   generateCalendarGrid(year, month);
   
-  // Then get the exercise data for this user and month
-  window.db.collection("Exercises")
-    .where("userId", "==", userName)
-    .where("year", "==", year)
-    .where("month", "==", month)
+  // Get all session documents for this user
+  window.db.collection("Client").doc(userId).collection("sessions")
     .get()
     .then((querySnapshot) => {
       // Create an object to store exercise data by day
       const exercisesByDay = {};
       
-      // Process exercise data
+      // Process each session document
       querySnapshot.forEach((doc) => {
-        const data = doc.data();
-        const day = data.day;
+        const sessionId = doc.id;
         
-        // If we don't have this day yet, initialize it
+        // Check if this session is from the current month
+        // Parse the date from the document ID (format: DDMMYYYY)
+        const day = parseInt(sessionId.substring(0, 2));
+        const monthFromId = parseInt(sessionId.substring(2, 4)) - 1; // 0-based month
+        const yearFromId = parseInt(sessionId.substring(4, 8));
+        
+        // Skip if not in the current month/year
+        if (monthFromId !== month || yearFromId !== year) {
+          return;
+        }
+        
+        // Get the session data
+        const data = doc.data();
+        
+        // Initialize data for this day if it doesn't exist
         if (!exercisesByDay[day]) {
           exercisesByDay[day] = {
             count: 0,
             duration: 0,
-            intensity: 0
+            intensity: 0,
+            exercises: []
           };
         }
         
-        // Add this exercise's data
-        exercisesByDay[day].count += 1;
-        exercisesByDay[day].duration += data.duration || 0;
+        // Count how many exercises by checking if there's an Exercise field
+        if (data.Exercise) {
+          exercisesByDay[day].count += 1;
+          
+          // Estimate duration based on number of reps
+          let totalReps = 0;
+          for (const field in data) {
+            if (field.startsWith('set_') && field.includes('_rep_')) {
+              totalReps += parseInt(data[field] || 0);
+            }
+          }
+          
+          // Estimate about 1 minute per 5 reps
+          const estimatedDuration = Math.max(5, Math.ceil(totalReps / 5));
+          exercisesByDay[day].duration += estimatedDuration;
+          
+          // Store exercise details
+          exercisesByDay[day].exercises.push({
+            name: data.Exercise,
+            reps: totalReps,
+            duration: estimatedDuration
+          });
+        }
         
-        // Calculate intensity based on count and duration
-        const intensity = Math.min(3, Math.ceil((exercisesByDay[day].count * exercisesByDay[day].duration) / 30));
+        // Calculate intensity based on duration
+        const intensity = Math.min(3, Math.ceil(exercisesByDay[day].duration / 15));
         exercisesByDay[day].intensity = intensity;
       });
       
@@ -149,7 +180,7 @@ function loadCalendarData(date) {
       updateExerciseSummary(exercisesByDay);
     })
     .catch((error) => {
-      console.error("Error getting exercise data:", error);
+      console.error("Error getting session data:", error);
     });
 }
 
@@ -213,7 +244,7 @@ function updateCalendarWithExercises(exercisesByDay) {
       // Add tooltip with exercise details
       dayCell.title = `${exercisesByDay[day].count} exercises, ${exercisesByDay[day].duration} minutes`;
       
-      // Optionally add click handler to show details
+      // Add click handler to show details
       dayCell.onclick = function() {
         showExerciseDetails(day, exercisesByDay[day]);
       };
@@ -302,40 +333,80 @@ function fetchDayExercises(day) {
   
   // If we have window.db, try to fetch the actual exercises
   if (window.db) {
-    const userName = sessionStorage.getItem('user');
+    const userId = sessionStorage.getItem('userId');
     
-    if (!userName) {
+    if (!userId) {
       exercisesContainer.innerHTML = '<p>No user information available.</p>';
       return;
     }
     
-    window.db.collection("Exercises")
-      .where("userId", "==", userName)
-      .where("year", "==", currentMonth.getFullYear())
-      .where("month", "==", currentMonth.getMonth())
-      .where("day", "==", parseInt(day))
+    // Format the day to match document ID format (DDMMYYYY)
+    const formattedDay = String(day).padStart(2, '0');
+    const formattedMonth = String(currentMonth.getMonth() + 1).padStart(2, '0');
+    const formattedYear = String(currentMonth.getFullYear());
+    const sessionId = formattedDay + formattedMonth + formattedYear;
+    
+    window.db.collection("Client").doc(userId).collection("sessions").doc(sessionId)
       .get()
-      .then((querySnapshot) => {
-        if (querySnapshot.empty) {
+      .then((docSnapshot) => {
+        if (!docSnapshot.exists) {
+          exercisesContainer.innerHTML = '<p>No exercise details found for this day.</p>';
+          return;
+        }
+        
+        const sessionData = docSnapshot.data();
+        
+        // Check if there's an Exercise field
+        if (!sessionData.Exercise) {
           exercisesContainer.innerHTML = '<p>No specific exercise details found for this day.</p>';
           return;
         }
         
         let html = '<h4>Exercises Completed</h4><ul class="day-exercise-list">';
         
-        querySnapshot.forEach((doc) => {
-          const exercise = doc.data();
-          html += `
-            <li class="day-exercise-item">
-              <div class="exercise-name">${exercise.name || 'Exercise'}</div>
-              <div class="exercise-details">
-                ${exercise.duration ? `<span>${exercise.duration} minutes</span>` : ''}
-                ${exercise.sets ? `<span>${exercise.sets} sets</span>` : ''}
-                ${exercise.reps ? `<span>${exercise.reps} reps</span>` : ''}
-              </div>
-            </li>
-          `;
-        });
+        // Count the number of sets and reps
+        const repsBySet = {};
+        
+        // Look for set_X_rep_Y fields
+        for (const field in sessionData) {
+          if (field.startsWith('set_') && field.includes('_rep_')) {
+            // Parse set and rep numbers
+            const parts = field.split('_');
+            if (parts.length === 4) {
+              const setNum = parts[1];
+              const repNum = parts[3];
+              
+              if (!repsBySet[setNum]) {
+                repsBySet[setNum] = [];
+              }
+              
+              repsBySet[setNum].push({
+                repNum: repNum,
+                value: sessionData[field]
+              });
+            }
+          }
+        }
+        
+        // Format exercise details
+        html += `
+          <li class="day-exercise-item">
+            <div class="exercise-name">${sessionData.Exercise}</div>
+            <div class="exercise-details">`;
+        
+        // Add each set and its reps
+        for (const setNum in repsBySet) {
+          // Sort reps by rep number
+          repsBySet[setNum].sort((a, b) => parseInt(a.repNum) - parseInt(b.repNum));
+          
+          const repsText = repsBySet[setNum].map(rep => rep.value).join(', ');
+          html += `<div>Set ${setNum}: ${repsText} reps</div>`;
+        }
+        
+        html += `
+            </div>
+          </li>
+        `;
         
         html += '</ul>';
         exercisesContainer.innerHTML = html;

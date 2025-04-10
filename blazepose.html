@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>BlazePose Landmarks</title>
+  <title>BlazePose Landmarks with Corrected Angle Calculations</title>
   <!-- Mediapipe scripts -->
   <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@mediapipe/control_utils/control_utils.js"></script>
@@ -68,10 +68,42 @@
     .description {
       margin-bottom: 15px;
     }
+    #angleData {
+      margin-top: 20px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      width: 640px;
+    }
+    .angle-card {
+      background-color: #f8f9fa;
+      border: 1px solid #dee2e6;
+      border-radius: 5px;
+      padding: 10px;
+      width: calc(33% - 10px);
+      box-sizing: border-box;
+    }
+    .angle-name {
+      font-weight: bold;
+      margin-bottom: 5px;
+    }
+    .angle-value {
+      font-size: 1.2em;
+      color: #4361ee;
+    }
+    .angle-description {
+      font-size: 0.8em;
+      color: #6c757d;
+      margin-top: 5px;
+    }
+    #toggleAnglesBtn {
+      margin-top: 10px;
+      background-color: #3a86ff;
+    }
   </style>
 </head>
 <body>
-  <h1>BlazePose Landmarks</h1>
+  <h1>BlazePose Landmarks with Corrected Angle Calculations</h1>
   
   <div class="container">
     <video class="input_video"></video>
@@ -80,12 +112,15 @@
   
   <div class="controls">
     <button id="startBtn">Start Tracking</button>
+    <button id="toggleAnglesBtn">Show Joint Angles</button>
     <div id="statusText">Loading camera...</div>
   </div>
 
+  <div id="angleData"></div>
+
   <div id="landmarkInfo">
     <div class="description">
-      <p>This demo shows all 33 BlazePose landmarks with their index numbers.</p>
+      <p>This demo shows BlazePose landmarks with corrected angle calculations. Joint angles like elbows should show values close to 180° when straight.</p>
     </div>
   </div>
 
@@ -96,6 +131,8 @@
     const canvasCtx = canvasElement.getContext('2d');
     const statusText = document.getElementById("statusText");
     const startBtn = document.getElementById("startBtn");
+    const toggleAnglesBtn = document.getElementById("toggleAnglesBtn");
+    const angleDataDiv = document.getElementById("angleData");
     
     // Set canvas dimensions
     canvasElement.width = 640;
@@ -103,6 +140,7 @@
     
     // Variables
     let isTracking = false;
+    let showAngles = false;
     
     // Landmark names for reference
     const landmarkNames = [
@@ -141,6 +179,152 @@
       "right_foot_index"    // 32
     ];
     
+    // Joint angle definitions with the three points needed to calculate each angle
+    const angleDefinitions = [
+      { 
+        name: "Left Elbow", 
+        points: [11, 13, 15], 
+        description: "Angle between left shoulder, elbow, and wrist"
+      },
+      { 
+        name: "Right Elbow", 
+        points: [12, 14, 16], 
+        description: "Angle between right shoulder, elbow, and wrist"
+      },
+      { 
+        name: "Left Shoulder", 
+        points: [23, 11, 13], 
+        description: "Angle between left hip, shoulder, and elbow"
+      },
+      { 
+        name: "Right Shoulder", 
+        points: [24, 12, 14], 
+        description: "Angle between right hip, shoulder, and elbow"
+      },
+      { 
+        name: "Left Hip", 
+        points: [11, 23, 25], 
+        description: "Angle between left shoulder, hip, and knee"
+      },
+      { 
+        name: "Right Hip", 
+        points: [12, 24, 26], 
+        description: "Angle between right shoulder, hip, and knee"
+      },
+      { 
+        name: "Left Knee", 
+        points: [23, 25, 27], 
+        description: "Angle between left hip, knee, and ankle"
+      },
+      { 
+        name: "Right Knee", 
+        points: [24, 26, 28], 
+        description: "Angle between right hip, knee, and ankle"
+      },
+      { 
+        name: "Left Wrist", 
+        points: [13, 15, 17], 
+        description: "Angle between left elbow, wrist, and pinky"
+      },
+      { 
+        name: "Right Wrist", 
+        points: [14, 16, 18], 
+        description: "Angle between right elbow, wrist, and pinky"
+      },
+      { 
+        name: "Trunk", 
+        points: [11, 23, 24], 
+        description: "Angle of the upper body trunk"
+      },
+      { 
+        name: "Neck", 
+        points: [0, 11, 12], 
+        description: "Angle of the neck"
+      }
+    ];
+    
+    // Vector class for angle calculations
+    class Vector {
+      constructor(x, y, z = 0) {
+        this.x = x;
+        this.y = y;
+        this.z = z;
+      }
+      
+      // Calculate magnitude of vector
+      mag() {
+        return Math.sqrt(this.x * this.x + this.y * this.y + this.z * this.z);
+      }
+      
+      // Calculate dot product with another vector
+      dot(v) {
+        return this.x * v.x + this.y * v.y + this.z * v.z;
+      }
+      
+      // Calculate cross product with another vector
+      cross(v) {
+        return new Vector(
+          this.y * v.z - this.z * v.y,
+          this.z * v.x - this.x * v.z,
+          this.x * v.y - this.y * v.x
+        );
+      }
+    }
+    
+    // Function to calculate angle between three points
+    function calculateAngle(p1, p2, p3) {
+      // Create vectors from middle point to the other points
+      const v1 = new Vector(p1.x - p2.x, p1.y - p2.y, p1.z - p2.z);
+      const v2 = new Vector(p3.x - p2.x, p3.y - p2.y, p3.z - p2.z);
+      
+      // Calculate dot product
+      const dotProduct = v1.dot(v2);
+      
+      // Calculate magnitudes
+      const m1 = v1.mag();
+      const m2 = v2.mag();
+      
+      // Calculate the angle in radians using the dot product formula
+      // Ensure the value is clamped to prevent floating point errors
+      const cosAngle = Math.max(-1, Math.min(1, dotProduct / (m1 * m2)));
+      const angleRad = Math.acos(cosAngle);
+      
+      // Convert to degrees
+      let angleDeg = (angleRad * 180) / Math.PI;
+      
+      // For joint angles like elbow, shoulder, etc., we need the interior angle
+      // For a straight arm, this should be close to 180 degrees
+      return angleDeg;
+    }
+    
+    // Function to update the angle display
+    function updateAngleDisplay(angles) {
+      angleDataDiv.innerHTML = '';
+      
+      for (const angle of angles) {
+        const angleCard = document.createElement('div');
+        angleCard.className = 'angle-card';
+        
+        const angleName = document.createElement('div');
+        angleName.className = 'angle-name';
+        angleName.textContent = angle.name;
+        
+        const angleValue = document.createElement('div');
+        angleValue.className = 'angle-value';
+        angleValue.textContent = `${angle.value.toFixed(1)}°`;
+        
+        const angleDescription = document.createElement('div');
+        angleDescription.className = 'angle-description';
+        angleDescription.textContent = angle.description;
+        
+        angleCard.appendChild(angleName);
+        angleCard.appendChild(angleValue);
+        angleCard.appendChild(angleDescription);
+        
+        angleDataDiv.appendChild(angleCard);
+      }
+    }
+    
     // Start button handler
     function onStart() {
       isTracking = !isTracking;
@@ -151,6 +335,20 @@
       } else {
         startBtn.textContent = "Start Tracking";
         statusText.textContent = "Pose tracking paused";
+        angleDataDiv.innerHTML = '';
+      }
+    }
+    
+    // Toggle angles button handler
+    function onToggleAngles() {
+      showAngles = !showAngles;
+      
+      if (showAngles) {
+        toggleAnglesBtn.textContent = "Hide Joint Angles";
+        angleDataDiv.style.display = 'flex';
+      } else {
+        toggleAnglesBtn.textContent = "Show Joint Angles";
+        angleDataDiv.style.display = 'none';
       }
     }
     
@@ -167,7 +365,7 @@
       // Draw the mirrored image
       canvasCtx.drawImage(results.image, 0, 0, canvasElement.width, canvasElement.height);
       
-      // Draw the skeleton mirrored
+      // Draw the skeleton and calculate angles
       if (results.poseLandmarks && isTracking) {
         // Draw connections
         drawConnectors(canvasCtx, results.poseLandmarks, POSE_CONNECTIONS,
@@ -180,25 +378,64 @@
         canvasCtx.restore();
         
         // Draw landmark numbers separately (not mirrored text)
-        if (results.poseLandmarks) {
-          for (let i = 0; i < results.poseLandmarks.length; i++) {
-            const landmark = results.poseLandmarks[i];
-            // Convert normalized coordinates to pixel coordinates (reversed for mirroring)
-            const x = canvasElement.width - (landmark.x * canvasElement.width);
-            const y = landmark.y * canvasElement.height;
+        for (let i = 0; i < results.poseLandmarks.length; i++) {
+          const landmark = results.poseLandmarks[i];
+          // Convert normalized coordinates to pixel coordinates (reversed for mirroring)
+          const x = canvasElement.width - (landmark.x * canvasElement.width);
+          const y = landmark.y * canvasElement.height;
+          
+          // Draw landmark number
+          canvasCtx.fillStyle = 'white';
+          canvasCtx.strokeStyle = 'black';
+          canvasCtx.lineWidth = 2;
+          canvasCtx.font = 'bold 14px Arial';
+          canvasCtx.textAlign = 'center';
+          canvasCtx.textBaseline = 'middle';
+          
+          // Draw text with outline for better visibility
+          canvasCtx.strokeText(i.toString(), x, y - 15);
+          canvasCtx.fillText(i.toString(), x, y - 15);
+        }
+        
+        // Calculate joint angles if showing angles
+        if (showAngles) {
+          const angles = [];
+          
+          for (const angleDef of angleDefinitions) {
+            const p1 = results.poseLandmarks[angleDef.points[0]];
+            const p2 = results.poseLandmarks[angleDef.points[1]];
+            const p3 = results.poseLandmarks[angleDef.points[2]];
             
-            // Draw landmark number
-            canvasCtx.fillStyle = 'white';
-            canvasCtx.strokeStyle = 'black';
-            canvasCtx.lineWidth = 2;
-            canvasCtx.font = 'bold 14px Arial';
-            canvasCtx.textAlign = 'center';
-            canvasCtx.textBaseline = 'middle';
-            
-            // Draw text with outline for better visibility
-            canvasCtx.strokeText(i.toString(), x, y - 15);
-            canvasCtx.fillText(i.toString(), x, y - 15);
+            // Check if all landmarks are detected with good visibility
+            if (p1 && p2 && p3 && p1.visibility > 0.5 && p2.visibility > 0.5 && p3.visibility > 0.5) {
+              const angle = calculateAngle(p1, p2, p3);
+              
+              angles.push({
+                name: angleDef.name,
+                value: angle,
+                description: angleDef.description
+              });
+              
+              // Also draw angles on the canvas
+              // Convert normalized coordinates to pixel coordinates (reversed for mirroring)
+              const x = canvasElement.width - (p2.x * canvasElement.width);
+              const y = p2.y * canvasElement.height;
+              
+              canvasCtx.fillStyle = 'rgba(255, 193, 7, 0.8)';
+              canvasCtx.strokeStyle = 'black';
+              canvasCtx.lineWidth = 1;
+              canvasCtx.font = 'bold 16px Arial';
+              canvasCtx.textAlign = 'center';
+              canvasCtx.textBaseline = 'middle';
+              
+              // Draw text with outline for better visibility
+              canvasCtx.strokeText(`${angle.toFixed(0)}°`, x, y + 30);
+              canvasCtx.fillText(`${angle.toFixed(0)}°`, x, y + 30);
+            }
           }
+          
+          // Update angle display
+          updateAngleDisplay(angles);
         }
       } else {
         canvasCtx.restore();
@@ -245,14 +482,17 @@
       .then(() => {
         console.log('Camera started successfully.');
         statusText.textContent = 'Camera ready. Press Start Tracking to begin.';
+        // Initialize angle display as hidden
+        angleDataDiv.style.display = 'none';
       })
       .catch(err => {
         console.error('Error starting camera:', err);
         statusText.textContent = 'Error accessing webcam. Please check camera permissions.';
       });
     
-    // Add event listener to Start button
+    // Add event listeners
     startBtn.addEventListener('click', onStart);
+    toggleAnglesBtn.addEventListener('click', onToggleAngles);
 
     // Create a reference list of landmarks
     function createLandmarkList() {

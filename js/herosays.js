@@ -14,6 +14,7 @@ const feedback = document.querySelector('.feedback');
 const scoreValue = document.getElementById('scoreValue');
 const finalScore = document.getElementById('finalScore');
 const timerBar = document.getElementById('timerBar');
+const INHIBITION_REWARD_DELAY = 5000; // 5 seconds of correct inhibition needed
 
 // Game state
 let isGameActive = false;
@@ -24,6 +25,7 @@ let poseTimer = null;
 let countdownTimer = null;
 let poseStartTime = 0;
 let heroSays = false;
+let correctInhibitionStartTime = null;
 
 // Pose detection state
 let poses = [];
@@ -34,7 +36,7 @@ const availablePoses = [
     id: 'hands_up', 
     name: 'Hands Up', 
     description: 'Raise both hands above your head',
-    imageUrl: 'images/bothhandsup.jpg',
+    imageUrl: '../images/herosays/herohandsup.png',
     check: (landmarks) => {
       if (!landmarks) return false;
       
@@ -50,7 +52,7 @@ const availablePoses = [
     id: 'hands_on_shoulders', 
     name: 'Hands on Shoulders', 
     description: 'Touch both shoulders with your hands',
-    imageUrl: 'images/shouldertouch.jpg',
+    imageUrl: '../images/herosays/herohandschest.png',
     check: (landmarks) => {
       if (!landmarks) return false;
       
@@ -79,7 +81,7 @@ const availablePoses = [
     id: 'left_hand_up', 
     name: 'Left Hand Up', 
     description: 'Raise only your left hand',
-    imageUrl: 'images/lefthandup.jpg',
+    imageUrl: '../images/herosays/heroraiseleft.png',
     check: (landmarks) => {
       if (!landmarks) return false;
       
@@ -96,7 +98,7 @@ const availablePoses = [
     id: 'right_hand_up', 
     name: 'Right Hand Up', 
     description: 'Raise only your right hand',
-    imageUrl: 'images/righthandup.jpg',
+    imageUrl: '../images/herosays/heroraiseright.png',
     check: (landmarks) => {
       if (!landmarks) return false;
       
@@ -113,7 +115,7 @@ const availablePoses = [
     id: 'touch_head', 
     name: 'Touch Head', 
     description: 'Touch your head with both hands',
-    imageUrl: 'images/headtouch.jpg',
+    imageUrl: '../images/herosays/herotohead.png',
     check: (landmarks) => {
       if (!landmarks) return false;
       
@@ -147,7 +149,7 @@ const availablePoses = [
     id: 'hands_on_hips', 
     name: 'Hands on Hips', 
     description: 'Place your hands on your hips',
-    imageUrl: 'images/hiptouch.jpg',
+    imageUrl: '../images/herosays/herotohip.png',
     check: (landmarks) => {
       if (!landmarks) return false;
       
@@ -176,7 +178,7 @@ const availablePoses = [
     id: 'arms_crossed', 
     name: 'Arms Crossed', 
     description: 'Cross your arms over your chest',
-    imageUrl: 'images/armcross.jpg',
+    imageUrl: '../images/herosays/heroarmcross.png',
     check: (landmarks) => {
       if (!landmarks) return false;
       
@@ -323,30 +325,25 @@ function checkPose(landmarks) {
   const isPoseCorrect = currentPose.check(landmarks);
   
   if (isPoseCorrect) {
+    // Reset inhibition timer if they're moving
+    correctInhibitionStartTime = null;
+    
     // If Hero says and pose is done - correct
     if (heroSays) {
-      // Only update if no success feedback is showing yet
       if (!feedback.classList.contains('success')) {
         feedback.textContent = 'Great job! Take your time. When you\'re ready, click "Next Pose"';
         feedback.className = 'feedback success';
-        
-        // Add score
         score += 10;
         updateScore();
-        
-        // Show next pose button
         showNextPoseButton();
       }
     } 
     // If not Hero says and pose is done - wrong!
     else {
-      // Only update if no failure feedback is showing yet
       if (!feedback.classList.contains('failure')) {
         feedback.textContent = 'Hero didn\'t say to do that! Try to follow instructions carefully.';
         feedback.className = 'feedback failure';
         
-        // For rehab patients, we don't end the game on mistakes
-        // Instead we let them try again after a short delay
         setTimeout(() => {
           feedback.textContent = 'Let\'s try another pose!';
           feedback.className = 'feedback';
@@ -354,10 +351,39 @@ function checkPose(landmarks) {
         }, 3000);
       }
     }
-  } else if (heroSays && feedback.classList.contains('success')) {
-    // If they had the correct pose but moved out of it, provide encouragement
-    feedback.textContent = 'Try to get back into the pose. Take your time.';
-    feedback.className = 'feedback';
+  } 
+  else {
+    // Handle correct inhibition (not doing the pose when it's "Do NOT do")
+    if (!heroSays) {
+      if (correctInhibitionStartTime === null) {
+        correctInhibitionStartTime = Date.now();
+      } 
+      else if (Date.now() - correctInhibitionStartTime > INHIBITION_REWARD_DELAY) {
+        if (!feedback.classList.contains('success')) {
+          feedback.textContent = 'Excellent ! Moving to next pose...';
+          feedback.className = 'feedback success';
+          score += 15; // Bonus points for inhibition
+          updateScore();
+          
+          setTimeout(() => {
+            selectRandomPose();
+            feedback.textContent = '';
+            feedback.className = 'feedback';
+          }, 2000);
+        }
+      }
+      else {
+        // Show countdown to reward
+        const remaining = Math.ceil((INHIBITION_REWARD_DELAY - (Date.now() - correctInhibitionStartTime))/1000);
+        feedback.textContent = `Keep holding... ${remaining}s`;
+        feedback.className = 'feedback';
+      }
+    }
+    // Handle exiting a correct "Hero says" pose
+    else if (feedback.classList.contains('success')) {
+      feedback.textContent = 'Try to get back into the pose. Take your time.';
+      feedback.className = 'feedback';
+    }
   }
 }
 
