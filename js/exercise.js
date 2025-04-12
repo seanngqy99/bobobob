@@ -47,6 +47,7 @@ function loadTodaysProgram() {
   const exercisesToCheck = [
     "Arm Raises",
     "Bicep Curls",
+    "Triceps Extension",
     "Hand Exercise",
     "Leg Extension",
     "Sit and Stand",
@@ -259,6 +260,8 @@ function startExercise(exerciseId) {
       window.location.href = 'workout_html/frontraises.html';
       break;
     case 'head-tilts':
+      window.location.href = 'workout_html/headtilts.html';
+      case 'triceps-extensions':
       window.location.href = 'workout_html/headtilts.html';
       break;
     default:

@@ -66,10 +66,13 @@
             </div>
         </section>
 
-        <!-- Exercise Library -->
+                <!-- Exercise Library -->
         <section class="exercise-library">
             <h2>Exercise Library</h2>
             <div class="exercise-grid">
+                <!-- Upper Body Exercises First -->
+                
+                <!-- Bicep Curl -->
                 <div class="exercise-card">
                     <img src="images/bicep curl.jpg" alt="Bicep Curl">
                     <h3>Bicep Curl</h3>
@@ -87,6 +90,25 @@
                     <button onclick="startExercise('bicep-curl')" class="start-btn">Start Exercise</button>
                 </div>
 
+                <!-- Triceps Extensions (New) -->
+                <div class="exercise-card">
+                    <img src="images/triceps-extension.png" alt="Triceps Extensions">
+                    <h3>Triceps Extensions</h3>
+                    <div class="exercise-settings">
+                        <div class="setting-group">
+                            <label for="triceps-extensions-sets">Sets:</label>
+                            <input type="number" id="triceps-extensions-sets" value="3" min="1" max="10" class="setting-input">
+                        </div>
+                        
+                        <div class="setting-group">
+                            <label for="triceps-extensions-reps">Reps:</label>
+                            <input type="number" id="triceps-extensions-reps" value="5" min="1" max="20" class="setting-input">
+                        </div>
+                    </div>
+                    <button onclick="startExercise('triceps-extensions')" class="start-btn">Start Exercise</button>
+                </div>
+
+                <!-- Arm Raises -->
                 <div class="exercise-card">
                     <img src="images/arm raises.jpg" alt="Arm Raises">
                     <h3>Arm Raises</h3>
@@ -104,6 +126,45 @@
                     <button onclick="startExercise('arm-raises')" class="start-btn">Start Exercise</button>
                 </div>
 
+                <!-- Front Raises -->
+                <div class="exercise-card">
+                    <img src="images/front-raises.jpg" alt="Front Raises">
+                    <h3>Front Raises</h3>
+                    <div class="exercise-settings">
+                        <div class="setting-group">
+                            <label for="front-raises-sets">Sets:</label>
+                            <input type="number" id="front-raises-sets" value="3" min="1" max="10" class="setting-input">
+                        </div>
+                        
+                        <div class="setting-group">
+                            <label for="front-raises-reps">Reps:</label>
+                            <input type="number" id="front-raises-reps" value="5" min="1" max="20" class="setting-input">
+                        </div>
+                    </div>
+                    <button onclick="startExercise('front-raises')" class="start-btn">Start Exercise</button>
+                </div>
+
+                <!-- Head Tilts -->
+                <div class="exercise-card">
+                    <img src="images/head-tilts.jpg" alt="Head Tilts">
+                    <h3>Head Tilts</h3>
+                    <div class="exercise-settings">
+                        <div class="setting-group">
+                            <label for="head-tilts-sets">Sets:</label>
+                            <input type="number" id="head-tilts-sets" value="3" min="1" max="10" class="setting-input">
+                        </div>
+                        
+                        <div class="setting-group">
+                            <label for="head-tilts-reps">Reps:</label>
+                            <input type="number" id="head-tilts-reps" value="5" min="1" max="20" class="setting-input">
+                        </div>
+                    </div>
+                    <button onclick="startExercise('head-tilts')" class="start-btn">Start Exercise</button>
+                </div>
+
+                <!-- Lower Body Exercises Next -->
+                
+                <!-- Sit and Stand -->
                 <div class="exercise-card">
                     <img src="images/sit and stand.jpg" alt="Sit and Stand">
                     <h3>Sit and Stand</h3>
@@ -121,6 +182,7 @@
                     <button onclick="startExercise('sit-and-stand')" class="start-btn">Start Exercise</button>
                 </div>
 
+                <!-- Leg Extension -->
                 <div class="exercise-card">
                     <img src="images/leg extension.png" alt="Leg Extension">
                     <h3>Leg Extension</h3>
@@ -138,6 +200,9 @@
                     <button onclick="startExercise('leg-extension')" class="start-btn">Start Exercise</button>
                 </div>
 
+                <!-- Hand and Finger Exercises Last -->
+                
+                <!-- Hand Exercise -->
                 <div class="exercise-card">
                     <img src="images/hand exercises.jpg" alt="Hand Exercise">
                     <h3>Hand Exercise</h3>
@@ -154,6 +219,8 @@
                     </div>
                     <button onclick="startExercise('hand-exercise')" class="start-btn">Start Exercise</button>
                 </div>
+
+                <!-- Finger Exercise -->
                 <div class="exercise-card">
                     <img src="images/finger-exercise.png" alt="Finger Exercise">
                     <h3>Finger Exercise</h3>
@@ -170,43 +237,7 @@
                     </div>
                     <button onclick="startExercise('finger-exercise')" class="start-btn">Start Exercise</button>
                 </div>
-    
-                <div class="exercise-card">
-                    <img src="images/front-raises.jpg" alt="Front Raises">
-                    <h3>Front Raises</h3>
-                    <div class="exercise-settings">
-                        <div class="setting-group">
-                            <label for="front-raises-sets">Sets:</label>
-                            <input type="number" id="front-raises-sets" value="3" min="1" max="10" class="setting-input">
-                        </div>
-                        
-                        <div class="setting-group">
-                            <label for="front-raises-reps">Reps:</label>
-                            <input type="number" id="front-raises-reps" value="5" min="1" max="20" class="setting-input">
-                        </div>
-                    </div>
-                    <button onclick="startExercise('front-raises')" class="start-btn">Start Exercise</button>
-                </div>
-    
-                <div class="exercise-card">
-                    <img src="images/head-tilts.jpg" alt="Head Tilts">
-                    <h3>Head Tilts</h3>
-                    <div class="exercise-settings">
-                        <div class="setting-group">
-                            <label for="head-tilts-sets">Sets:</label>
-                            <input type="number" id="head-tilts-sets" value="3" min="1" max="10" class="setting-input">
-                        </div>
-                        
-                        <div class="setting-group">
-                            <label for="head-tilts-reps">Reps:</label>
-                            <input type="number" id="head-tilts-reps" value="5" min="1" max="20" class="setting-input">
-                        </div>
-                    </div>
-                    <button onclick="startExercise('head-tilts')" class="start-btn">Start Exercise</button>
-                </div>
             </div>
-            
-        </div>
         </section>
         
         <!-- Interactive Games -->
