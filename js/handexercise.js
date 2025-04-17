@@ -22,7 +22,7 @@ function onHandStateChange(newState) {
   let ctx;
   let detector;
   let hands = [];
-  
+
   // Exercise variables
   let exerciseActive = false;
   let selectedHand = 'right'; // Default to right hand

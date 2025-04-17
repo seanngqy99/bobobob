@@ -1,6 +1,6 @@
-const APP_ID = "3680dcdc8b6f4146990cf8c707ec295d";
 const TOKEN = ""; // Fill in if using token auth
 const CHANNEL = "GetDiagnosed";
+const APP_ID = "3680dcdc8b6f4146990cf8c707ec295d";
 
 const client = AgoraRTC.createClient({ mode: "rtc", codec: "vp8" });
 

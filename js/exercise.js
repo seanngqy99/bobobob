@@ -91,7 +91,7 @@ function loadTodaysProgram() {
       // Process regular exercises (non-games)
       const regularExercises = snapshots
         .filter((doc, index) => {
-          // Keep only documents that exist, have proper sets/reps, and are not Games
+          // Keep only documents that exist, have proper sets/reps
           return doc.exists &&
             doc.data().sets > 0 &&
             doc.data().reps > 0 &&
@@ -261,8 +261,9 @@ function startExercise(exerciseId) {
       break;
     case 'head-tilts':
       window.location.href = 'workout_html/headtilts.html';
-      case 'triceps-extensions':
-      window.location.href = 'workout_html/headtilts.html';
+      break;
+    case 'triceps-extensions':
+      window.location.href = 'workout_html/triceps.html';
       break;
     default:
       console.log('No specific page for this exercise');
