@@ -31,7 +31,7 @@ let inTouchPhase = false; // Flag to track if we're in touching or separating ph
 let isResting = false;
 let restTimeRemaining = 0;
 let restInterval;
-const restBetweenSets = 5; // 5 seconds rest between sets
+const restBetweenSets = 15; // 5 seconds rest between sets
 
 // UI Elements
 let repCountDisplay;
@@ -41,6 +41,7 @@ let startButton;
 let resetButton;
 let handSelect;
 let progressContainer;
+let statusText;
 
 // Add these variables at the top with other exercise variables
 let leftHandState = {
@@ -64,6 +65,7 @@ async function initializeHandTracking() {
   resetButton = document.getElementById('resetExercise');
   handSelect = document.getElementById('handSelect');
   progressContainer = document.getElementById('handProgress');
+  statusText = document.getElementById('statusText');
 
   // Disable start button until model is loaded
   if (startButton) startButton.disabled = true;
@@ -71,14 +73,23 @@ async function initializeHandTracking() {
   // Add event listeners
   if (startButton) startButton.addEventListener('click', startExercise);
   if (resetButton) resetButton.addEventListener('click', resetExercise);
-  if (handSelect) {
-    handSelect.addEventListener('change', (e) => {
+
+  // Handle radio button selection
+  const radioButtons = document.querySelectorAll('input[name="handSelect"]');
+  radioButtons.forEach(radio => {
+    radio.addEventListener('change', (e) => {
       selectedHand = e.target.value;
       updateStatus(`Selected ${selectedHand} hand(s)`);
-      // Reinitialize detector with new hand count
+
+      // Important: Reinitialize the detector when hand selection changes
       reinitializeDetector();
+
+      if (document.getElementById('currentHandDisplay')) {
+        document.getElementById('currentHandDisplay').textContent =
+          selectedHand.charAt(0).toUpperCase() + selectedHand.slice(1);
+      }
     });
-  }
+  });
 
   // Get parameters from session storage
   getExerciseParameters();
@@ -314,8 +325,8 @@ function updateSetsDisplay() {
 }
 
 function updateStatus(message) {
-  if (statusDisplay) {
-    statusDisplay.textContent = `Status: ${message}`;
+  if (statusText) {
+    statusText.textContent = message;
   }
 }
 

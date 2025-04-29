@@ -32,7 +32,7 @@ let inRotationPhase = false; // Flag to track if we're in rotating or returning 
 let isResting = false;
 let restTimeRemaining = 0;
 let restInterval;
-const restBetweenSets = 5; // 30 seconds rest between sets
+const restBetweenSets = 15; // 15 seconds rest between sets
 
 // UI Elements
 let repCountDisplay;
@@ -1148,10 +1148,13 @@ function onStart() {
     rightRepStarted = false;
     smoothedLeftAngle = 0;
     smoothedRightAngle = 0;
-    currentLeftAngleMin = 0;
-    currentLeftAngleMax = 0;
-    currentRightAngleMin = 0;
-    currentRightAngleMax = 0;
+
+    // Initialize angle tracking variables to more appropriate values
+    currentLeftAngleMin = 180;  // Start with a high value
+    currentLeftAngleMax = -180; // Start with a low value
+    currentRightAngleMin = 180; // Start with a high value
+    currentRightAngleMax = -180; // Start with a low value
+
     isAssessmentActive = false;
 
     // Reset set counter

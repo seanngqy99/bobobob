@@ -32,44 +32,37 @@
     <div class="three-column-layout">
       <!-- Left column: user controls -->
       <div id="controls" class="left-column">
-        <h2>Finger Touching Exercise</h2>
+        <h2>Finger Touch Exercise</h2>
         <p>
-          Practice touching your thumb to each finger to improve dexterity and
-          coordination.
+          Touch your thumb to each finger in sequence. This exercise improves
+          finger dexterity and coordination.
         </p>
 
-        <div class="control-group">
-          <label for="handSelect">Select Hand:</label>
-          <select id="handSelect">
-            <option value="left">Left Hand</option>
-            <option value="right" selected>Right Hand</option>
-            <option value="both">Both Hands</option>
-          </select>
+        <!-- Hand selection -->
+        <div class="radio-group">
+          <label class="radio-label">
+            <input type="radio" name="handSelect" value="left" checked /> Left
+            Hand
+          </label>
+          <label class="radio-label">
+            <input type="radio" name="handSelect" value="right" /> Right Hand
+          </label>
+          <label class="radio-label">
+            <input type="radio" name="handSelect" value="both" /> Both Hands
+          </label>
         </div>
 
-        <div class="control-group">
-          <button id="startExercise" class="primary-button">
-            Start Exercise
-          </button>
-          <button id="resetExercise" class="secondary-button">Reset</button>
-        </div>
+        <!-- Rep and Set inputs (hidden) -->
+        <input type="hidden" id="repInput" value="5" />
+        <input type="hidden" id="setInput" value="3" />
 
-        <div class="stats-display">
-          <p id="repCount">Reps: 0 / 10</p>
-          <p class="sets-display" id="setsDisplay">Sets: 1/1</p>
-          <p id="exerciseStatus">Status: Not Started</p>
-        </div>
+        <!-- Start button -->
+        <button id="startExercise">Start Exercise</button>
 
-        <div class="exercise-instructions-panel">
-          <h3>How to do this exercise:</h3>
-          <ol>
-            <li>Position yourself so your hand is clearly visible</li>
-            <li>When prompted, touch your thumb to each finger in sequence</li>
-            <li>Start with index finger, then middle, ring, and pinky</li>
-            <li>Complete the sequence for one full repetition</li>
-            <li>Repeat for the recommended number of repetitions</li>
-          </ol>
-        </div>
+        <!-- Status / counters -->
+        <p id="leftCountText"></p>
+        <p id="rightCountText"></p>
+        <p id="statusText">Waiting to start...</p>
       </div>
 
       <!-- Middle column: video feed -->
